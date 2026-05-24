@@ -2,9 +2,9 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose'
+import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from './modules/users/users.module';
-import { AuthModule } from './modules/auth/auth.module';
+import { AuthModule } from './auth/auth.module';
 import { AddressesModule } from './modules/addresses/addresses.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { UploadsModule } from './modules/uploads/uploads.module';
@@ -31,7 +31,7 @@ import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({isGlobal: true}),
+    ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -41,7 +41,7 @@ import { AdminModule } from './modules/admin/admin.module';
     }),
 
     //Core modules
-    UsersModule, 
+    UsersModule,
     AuthModule,
     AddressesModule,
     AdminModule,
@@ -71,7 +71,7 @@ import { AdminModule } from './modules/admin/admin.module';
     StoresModule,
     PagesModule,
     NotificationsModule,
-    ReportsModule
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
