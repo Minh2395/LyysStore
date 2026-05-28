@@ -7,7 +7,11 @@ import { Model } from 'mongoose';
 import { hashPasswordHelper } from '../../helpers/util';
 import aqp from 'api-query-params';
 import mongoose from 'mongoose';
-import { CreateAuthDto } from '../../auth/dto/create-auth.dto';
+import {
+  ChangePasswordAuthDto,
+  CodeAuthDto,
+  CreateAuthDto,
+} from '../../auth/dto/create-auth.dto';
 import { v4 as uuidv4 } from 'uuid';
 import { MailerService } from '@nestjs-modules/mailer';
 
@@ -136,6 +140,149 @@ export class UsersService {
 
     return {
       _id: user._id,
+    };
+  }
+
+  async handleActive(data: CodeAuthDto) {
+    const user = await this.userModel.findOne({
+      _id: data._id,
+      verification_code: data.code,
+    });
+
+    if (!user) {
+      throw new BadRequestException('Mã code không hợp lệ hoặc đã hết hạn');
+    }
+
+    // check expire
+    const isBeforeCheck =
+      new Date().getTime() < new Date(user.verification_expires).getTime();
+
+    if (!isBeforeCheck) {
+      throw new BadRequestException('Mã code không hợp lệ hoặc đã hết hạn');
+    }
+
+    // activate account
+    await this.userModel.updateOne(
+      { _id: user._id },
+      {
+        is_active: true,
+        verification_code: null,
+        verification_expires: null,
+      },
+    );
+
+    return {
+      message: 'Kích hoạt tài khoản thành công',
+    };
+  }
+
+  async retryActive(email: string) {
+    // check email
+    const user = await this.userModel.findOne({ email });
+
+    if (!user) {
+      throw new BadRequestException('Email không tồn tại');
+    }
+    if (user.is_active) {
+      throw new BadRequestException('Tài khoản đã được kích hoạt');
+    }
+
+    const verification_code = uuidv4();
+
+    // update user
+    await user.updateOne({
+      verification_code: verification_code,
+      verification_expires: new Date(Date.now() + 10 * 60 * 1000),
+    });
+
+    // resend Email
+    this.mailerService.sendMail({
+      to: user.email,
+      subject: 'Activate your account at @lyysstore',
+      template: 'register',
+      context: {
+        name: user?.name ?? user.email,
+        activationCode: verification_code,
+      },
+    });
+
+    return {
+      _id: user._id,
+    };
+  }
+
+  async retryPassword(email: string) {
+    // check email
+    const user = await this.userModel.findOne({ email });
+
+    if (!user) {
+      throw new BadRequestException('Email không tồn tại');
+    }
+
+    const verification_code = uuidv4();
+
+    // update user
+    await user.updateOne({
+      verification_code: verification_code,
+      verification_expires: new Date(Date.now() + 10 * 60 * 1000),
+    });
+
+    // resend Email
+    this.mailerService.sendMail({
+      to: user.email,
+      subject: 'Change your password account at @lyysstore',
+      template: 'register',
+      context: {
+        name: user?.name ?? user.email,
+        activationCode: verification_code,
+      },
+    });
+
+    return {
+      _id: user._id,
+      email: user.email,
+    };
+  }
+
+  async changePassword(data: ChangePasswordAuthDto) {
+    // check confirm password
+    if (data.confirmPassword !== data.password) {
+      throw new BadRequestException('Mật khẩu và xác nhận mật khẩu không khớp');
+    }
+
+    // find user
+    const user = await this.userModel.findOne({
+      email: data.email,
+      verification_code: data.code,
+    });
+
+    if (!user) {
+      throw new BadRequestException('Email hoặc mã xác thực không hợp lệ');
+    }
+
+    // check code expire
+    const isBeforeCheck =
+      new Date().getTime() < new Date(user.verification_expires).getTime();
+
+    if (!isBeforeCheck) {
+      throw new BadRequestException('Mã xác thực đã hết hạn');
+    }
+
+    // hash new password
+    const newPassword = await hashPasswordHelper(data.password);
+
+    // update password
+    await this.userModel.updateOne(
+      { _id: user._id },
+      {
+        password: newPassword,
+        verification_code: null,
+        verification_expires: null,
+      },
+    );
+
+    return {
+      message: 'Đổi mật khẩu thành công',
     };
   }
 }
