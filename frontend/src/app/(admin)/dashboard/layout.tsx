@@ -1,23 +1,31 @@
-import AdminContent from "@/components/adminLayout/admin.content";
-import AdminFooter from "@/components/adminLayout/admin.footer";
-import AdminHeader from "@/components/adminLayout/admin.header";
-import AdminSidebar from "@/components/adminLayout/admin.sidebar";
-import { Layout } from "antd";
+import AdminContent from '@/components/layout/admin.content';
+import AdminFooter from '@/components/layout/admin.footer';
+import AdminHeader from '@/components/layout/admin.header';
+import AdminSideBar from '@/components/layout/admin.sidebar';
+import { AdminContextProvider } from '@/library/admin.context';
 
 const AdminLayout = ({
-  children,
+    children,
 }: Readonly<{
-  children: React.ReactNode;
+    children: React.ReactNode;
 }>) => {
-  return (
-    <Layout>
-      <AdminSidebar />
-      <Layout>
-        <AdminHeader />
-        <AdminContent>{children}</AdminContent>
-        <AdminFooter />
-      </Layout>
-    </Layout>
-  );
-};
-export default AdminLayout;
+
+    return (
+        <AdminContextProvider>
+            <div style={{ display: "flex" }}>
+                <div className='left-side' style={{ minWidth: 80 }}>
+                    <AdminSideBar />
+                </div>
+                <div className='right-side' style={{ flex: 1 }}>
+                    <AdminHeader />
+                    <AdminContent>
+                        {children}
+                    </AdminContent>
+                    <AdminFooter />
+                </div>
+            </div>
+        </AdminContextProvider>
+    )
+}
+
+export default AdminLayout

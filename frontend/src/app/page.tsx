@@ -1,10 +1,11 @@
+import { auth } from "@/auth";
+import HomePage from "@/components/layout/homepage";
 
-export default function Home() {
+export default async function Home() {
+  const session = await auth();
   return (
-    <div>hello world
-      <div>
-        <button type="button"> Add new </button>
-      </div>
+    <div>
+      <HomePage />
     </div>
   );
 }
