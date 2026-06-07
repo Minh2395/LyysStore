@@ -5,8 +5,9 @@ import { ArrowLeftOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import ModalReactive from "./modal.reactive";
 import { useState } from "react";
+
+import ModalReactive from "./modal.reactive";
 import ModalChangePassword from "./modal.change.password";
 
 const Login = () => {
@@ -22,23 +23,22 @@ const Login = () => {
   const onFinish = async (values: any) => {
     const { email, password } = values;
 
-    try {
-      setLoading(true);
+    setLoading(true);
 
+    try {
       const res = await signIn("credentials", {
         email,
         password,
         redirect: false,
       });
 
-      if (res?.error) {
+      if (!res || res.error) {
         notification.error({
           message: "Login failed",
-          description: res.error,
+          description: res?.error || "Unknown error",
         });
 
-        // 👉 map error theo NextAuth error name
-        if (res.error === "InActiveAccountError") {
+        if (res?.error === "InActiveAccountError") {
           setIsModalOpen(true);
           setUserEmail(email);
         }
@@ -46,12 +46,28 @@ const Login = () => {
         return;
       }
 
+      await new Promise((r) => setTimeout(r, 300));
+
+      // lấy session sau login
+      const sessionRes = await fetch("/api/auth/session");
+      const session = await sessionRes.json();
+
+      const role = session?.user?.role;
+
       notification.success({
         message: "Login successful",
       });
 
       form.resetFields();
-      router.push("/dashboard");
+
+      // ✅ ROUTE THEO ROLE
+      if (role === "ADMIN") {
+        router.push("/admin/dashboard");
+      } else {
+        router.push("/users/home");
+      }
+
+      router.refresh();
     } catch (err: any) {
       notification.error({
         message: "System error",

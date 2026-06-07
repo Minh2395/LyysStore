@@ -28,18 +28,21 @@ export class AuthService {
     const user = await this.usersService.findByEmail(email);
 
     if (!user) {
-      return null;
+      throw new UnauthorizedException('User not found');
+    }
+
+    if (!user.password) {
+      throw new UnauthorizedException('Missing password in DB query');
     }
 
     const isValidPassword = await comparePasswordHelper(pass, user.password);
 
     if (!isValidPassword) {
-      return null;
+      throw new UnauthorizedException('Wrong password');
     }
 
-    // ⚠️ FIX: schema field consistency
     if (!user.is_active) {
-      throw new UnauthorizedException('Account not activated');
+      throw new UnauthorizedException('Account not active');
     }
 
     return user;

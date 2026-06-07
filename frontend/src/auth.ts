@@ -1,34 +1,13 @@
-import NextAuth from "next-auth";
+import NextAuth, { CredentialsSignin } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import Facebook from "next-auth/providers/facebook";
 
+import { sendRequest } from "./utils/api";
 import {
   InActiveAccountError,
   InvalidEmailPasswordError,
 } from "./utils/errors";
-
-import { sendRequest } from "./utils/api";
-
-// ======================
-// TYPES
-// ======================
-
-interface IUser {
-  _id: string;
-  name: string;
-  email: string;
-  role: "USER" | "ADMIN" | "STAFF";
-}
-
-interface ILoginResponse {
-  user: IUser;
-  access_token: string;
-}
-
-// ======================
-// NEXTAUTH
-// ======================
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
@@ -39,9 +18,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
 
       authorize: async (credentials) => {
-        if (!credentials?.email || !credentials?.password) {
-          return null;
-        }
+        console.log("👉 AUTHORIZE HIT");
 
         try {
           const res = await sendRequest<any>({
@@ -53,37 +30,29 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             },
           });
 
-          console.log("LOGIN RESPONSE:", res);
+          console.log("👉 LOGIN RESPONSE:", res);
 
-          // ⚠️ FIX: support cả 2 kiểu backend trả về
-          const user = res?.data?.user || res?.user;
-          const token = res?.data?.access_token || res?.access_token;
+          const user = res?.data?.user;
+          const access_token = res?.data?.access_token;
 
-          if (!user || !token) {
-            console.error("Invalid login response shape:", res);
+          console.log("👉 PARSED USER:", user);
+          console.log("👉 TOKEN:", access_token);
+
+          if (!user || !access_token) {
+            console.log("❌ MISSING USER OR TOKEN");
             return null;
           }
 
           return {
-            id: user._id,
-            name: user.name,
+            id: user._id?.toString(),
+            name: user.username,
             email: user.email,
-            role: user.role,
-            access_token: token,
+            access_token,
+            refresh_token: res?.data?.refresh_token,
+            access_expire: res?.data?.access_expire,
           };
-        } catch (err: any) {
-          console.error("AUTH ERROR:", err);
-
-          const status = err?.statusCode;
-
-          if (status === 401) {
-            throw new InvalidEmailPasswordError();
-          }
-
-          if (status === 400) {
-            throw new InActiveAccountError();
-          }
-
+        } catch (err) {
+          console.log("❌ AUTHORIZE ERROR:", err);
           return null;
         }
       },
@@ -109,26 +78,26 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       if (user) {
         const u = user as any;
 
-        token.id = u.id;
-        token.role = u.role;
         token.access_token = u.access_token;
+        token.refresh_token = u.refresh_token;
+        token.access_expire = u.access_expire;
 
-        token.name = u.name;
-        token.email = u.email;
+        token.user = {
+          id: u.user?._id || u._id || u.id,
+          name: u.user?.name || u.name || "",
+          email: u.user?.email || u.email,
+          role: u.user?.role || u.role,
+        };
       }
 
       return token;
     },
 
     async session({ session, token }) {
-      session.user = {
-        id: token.id as string,
-        name: token.name as string,
-        email: token.email as string,
-        role: token.role as "USER" | "ADMIN" | "STAFF",
-      };
-
+      session.user = token.user as any;
       session.access_token = token.access_token as string;
+      session.refresh_token = token.refresh_token as string;
+      session.access_expire = token.access_expire as number;
 
       return session;
     },

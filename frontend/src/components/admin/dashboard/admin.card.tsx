@@ -9,10 +9,10 @@ interface IAdminCardItem {
 }
 
 interface Props {
-  items: IAdminCardItem[];
+  items?: IAdminCardItem[];
 }
 
-const AdminCard = ({ items }: Props) => {
+const AdminCard = ({ items = [] }: Props) => {
   return (
     <Row gutter={[16, 16]}>
       {items.map((item, index) => (

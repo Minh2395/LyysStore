@@ -53,12 +53,13 @@ export const sendRequest = async <T>(props: IRequest): Promise<T> => {
   const data = text ? JSON.parse(text) : null;
 
   if (!res.ok) {
-    throw {
-      statusCode: res.status,
-      message: data?.message || "Request failed",
-      error: data?.error || "",
-    };
-  }
+  const error = new Error(data?.message || "Request failed") as any;
+
+  error.statusCode = res.status;
+  error.error = data?.error || "";
+
+  throw error;
+}
 
   return data as T;
 };

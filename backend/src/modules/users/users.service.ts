@@ -101,9 +101,7 @@ export class UsersService {
   // FIND BY EMAIL
   // ======================
   async findByEmail(email: string) {
-    return this.userModel
-      .findOne({ email, is_deleted: false })
-      .select('+password');
+    return this.userModel.findOne({ email }).select('+password');
   }
 
   // ======================

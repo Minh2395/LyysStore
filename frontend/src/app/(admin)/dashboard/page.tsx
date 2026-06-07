@@ -1,4 +1,4 @@
-import AdminCard from "@/components/admin/admin.card";
+import AdminCard from "@/components/admin/dashboard/admin.card";
 
 const DashboardPage = () => {
   return (
