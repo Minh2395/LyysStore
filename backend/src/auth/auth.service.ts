@@ -1,7 +1,13 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
+
 import { UsersService } from '../modules/users/users.service';
 import { comparePasswordHelper } from '../helpers/util';
 import { JwtService } from '@nestjs/jwt';
+
 import {
   ChangePasswordAuthDto,
   CodeAuthDto,
@@ -15,48 +21,95 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async validateUser(username: string, pass: string): Promise<any> {
-    const user = await this.usersService.findByEmail(username);
+  // ======================
+  // VALIDATE USER (LOCAL STRATEGY)
+  // ======================
+  async validateUser(email: string, pass: string) {
+    const user = await this.usersService.findByEmail(email);
+
     if (!user) {
       return null;
     }
+
     const isValidPassword = await comparePasswordHelper(pass, user.password);
+
     if (!isValidPassword) {
       return null;
+    }
+
+    // ⚠️ FIX: schema field consistency
+    if (!user.is_active) {
+      throw new UnauthorizedException('Account not activated');
     }
 
     return user;
   }
 
+  // ======================
+  // LOGIN
+  // ======================
   async login(user: any) {
-    const payload = { username: user.email, sub: user._id };
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const payload = {
+      sub: user._id,
+      email: user.email,
+      role: user.role,
+    };
+
     return {
       user: {
-        email: user.email,
         _id: user._id,
+        email: user.email,
         name: user.name,
+        role: user.role,
       },
       access_token: this.jwtService.sign(payload),
     };
   }
 
-  Register = async (registerDto: CreateAuthDto) => {
-    return await this.usersService.handleRegister(registerDto);
-  };
+  // ======================
+  // REGISTER
+  // ======================
+  async register(registerDto: CreateAuthDto) {
+    return this.usersService.handleRegister(registerDto);
+  }
 
-  checkCode = async (data: CodeAuthDto) => {
-    return await this.usersService.handleActive(data);
-  };
+  // ======================
+  // VERIFY CODE
+  // ======================
+  async checkCode(data: CodeAuthDto) {
+    return this.usersService.handleActive(data);
+  }
 
-  retryActive = async (data: string) => {
-    return await this.usersService.retryActive(data);
-  };
+  // ======================
+  // RESEND ACTIVATION CODE
+  // ======================
+  async retryActive(email: string) {
+    if (!email) {
+      throw new BadRequestException('Email is required');
+    }
 
-  retryPassword = async (data: string) => {
-    return await this.usersService.retryPassword(data);
-  };
+    return this.usersService.retryActive(email);
+  }
 
-  changePassword = async (data: ChangePasswordAuthDto) => {
-    return await this.usersService.changePassword(data);
-  };
+  // ======================
+  // RESET PASSWORD FLOW
+  // ======================
+  async retryPassword(email: string) {
+    if (!email) {
+      throw new BadRequestException('Email is required');
+    }
+
+    return this.usersService.retryPassword(email);
+  }
+
+  // ======================
+  // CHANGE PASSWORD
+  // ======================
+  async changePassword(data: ChangePasswordAuthDto) {
+    return this.usersService.changePassword(data);
+  }
 }

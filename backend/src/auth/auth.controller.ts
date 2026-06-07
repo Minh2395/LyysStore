@@ -1,82 +1,75 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-  UseGuards,
-  Request,
-} from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
+
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './passport/local-auth.guard';
+
 import { Public, ResponseMessage } from '../decorator/customize';
+
 import {
   ChangePasswordAuthDto,
   CodeAuthDto,
   CreateAuthDto,
 } from './dto/create-auth.dto';
-import { MailerService } from '@nestjs-modules/mailer';
+
+import { EmailDto } from '../auth/dto/email.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly mailerService: MailerService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
+  // ======================
+  // LOGIN
+  // ======================
   @Post('login')
   @Public()
   @UseGuards(LocalAuthGuard)
-  @ResponseMessage('Fetch login')
+  @ResponseMessage('Login successfully')
   handleLogin(@Request() req) {
     return this.authService.login(req.user);
   }
 
+  // ======================
+  // REGISTER
+  // ======================
   @Post('register')
   @Public()
-  handleRegister(@Body() registerDto: CreateAuthDto) {
-    return this.authService.Register(registerDto);
+  register(@Body() registerDto: CreateAuthDto) {
+    return this.authService.register(registerDto);
   }
 
+  // ======================
+  // VERIFY CODE
+  // ======================
   @Post('check-code')
   @Public()
-  checkCode(@Body() registerDto: CodeAuthDto) {
-    return this.authService.checkCode(registerDto);
+  checkCode(@Body() dto: CodeAuthDto) {
+    return this.authService.checkCode(dto);
   }
 
+  // ======================
+  // RESEND ACTIVATION
+  // ======================
   @Post('retry-active')
   @Public()
-  retryActive(@Body('email') email: string) {
-    return this.authService.retryActive(email);
+  retryActive(@Body() dto: EmailDto) {
+    return this.authService.retryActive(dto.email);
   }
 
+  // ======================
+  // RESET PASSWORD
+  // ======================
   @Post('retry-password')
   @Public()
-  retryPassword(@Body('email') email: string) {
-    return this.authService.retryPassword(email);
+  retryPassword(@Body() dto: EmailDto) {
+    return this.authService.retryPassword(dto.email);
   }
 
+  // ======================
+  // CHANGE PASSWORD
+  // ======================
   @Post('change-password')
   @Public()
   changePassword(@Body() data: ChangePasswordAuthDto) {
     return this.authService.changePassword(data);
-  }
-
-  @Get('mail')
-  @Public()
-  testMail() {
-    this.mailerService.sendMail({
-      to: 'vongominh2395@gmail.com',
-      subject: 'Lyys-Store',
-      text: 'welcome',
-      template: 'register',
-      context: {
-        name: 'Minh',
-        activationCode: 123456789,
-      },
-    });
-    return 'oke';
   }
 }

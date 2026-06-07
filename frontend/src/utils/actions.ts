@@ -2,31 +2,41 @@
 
 import { signIn } from "@/auth";
 
-export async function authenticate(username: string, password: string) {
+export async function authenticate(email: string, password: string) {
   try {
-    const r = await signIn("credentials", {
-      username: username,
-      password: password,
-      // callbackUrl: "/",
+    const res = await signIn("credentials", {
+      email,
+      password,
       redirect: false,
     });
-    return r;
-  } catch (error) {
-    if ((error as any).name === "InvalidEmailPasswordError") {
+
+    return {
+      success: true,
+      data: res,
+    };
+  } catch (error: any) {
+    const errorType = error?.type || error?.name;
+
+    if (errorType === "InvalidEmailPasswordError") {
       return {
-        error: (error as any).type,
+        success: false,
         code: 1,
-      };
-    } else if ((error as any).name === "InActiveAccountError") {
-      return {
-        error: (error as any).type,
-        code: 2,
-      };
-    } else {
-      return {
-        error: "Internal sever error",
-        code: 0,
+        message: "Email hoặc mật khẩu không đúng",
       };
     }
+
+    if (errorType === "InActiveAccountError") {
+      return {
+        success: false,
+        code: 2,
+        message: "Tài khoản chưa được kích hoạt",
+      };
+    }
+
+    return {
+      success: false,
+      code: 0,
+      message: "Internal server error",
+    };
   }
 }

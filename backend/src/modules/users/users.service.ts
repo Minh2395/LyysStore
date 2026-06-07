@@ -1,148 +1,246 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+
 import { InjectModel } from '@nestjs/mongoose';
-import { User } from './schemas/user.schema';
+import {
+  User,
+  UserDocument,
+  AccountType,
+  UserRole,
+} from './schemas/user.schema';
 import { Model } from 'mongoose';
-import { hashPasswordHelper } from '../../helpers/util';
-import aqp from 'api-query-params';
 import mongoose from 'mongoose';
+import aqp from 'api-query-params';
+import { v4 as uuidv4 } from 'uuid';
+import { MailerService } from '@nestjs-modules/mailer';
+
+import { hashPasswordHelper } from '../../helpers/util';
+
 import {
   ChangePasswordAuthDto,
   CodeAuthDto,
   CreateAuthDto,
 } from '../../auth/dto/create-auth.dto';
-import { v4 as uuidv4 } from 'uuid';
-import { MailerService } from '@nestjs-modules/mailer';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name)
-    private userModel: Model<User>,
+    private userModel: Model<UserDocument>,
     private readonly mailerService: MailerService,
   ) {}
 
-  isEmailExist = async (email: string) => {
-    const user = await this.userModel.exists({ email });
-    if (user) return true;
-    return false;
-  };
+  // ======================
+  // EMAIL CHECK
+  // ======================
+  async isEmailExist(email: string) {
+    return !!(await this.userModel.exists({
+      email,
+      is_deleted: false,
+    }));
+  }
 
-  async create(createUserDto: CreateUserDto) {
-    const { name, email, password, phone } = createUserDto;
+  // ======================
+  // CREATE USER
+  // ======================
+  async create(dto: CreateAuthDto) {
+    const { name, email, password, phone } = dto;
 
-    // check email
-    const isExist = await this.isEmailExist(email);
-    if (isExist) {
-      throw new BadRequestException(
-        `Email đã tồn tại: ${email}. Vui lòng sử dụng email khác.`,
-      );
+    if (await this.isEmailExist(email)) {
+      throw new BadRequestException('Email đã tồn tại');
     }
 
-    // hash password
     const hashPassword = await hashPasswordHelper(password);
+
     const user = await this.userModel.create({
       name,
       email,
       password: hashPassword,
       phone,
+
+      role: UserRole.USER,
+      account_type: AccountType.LOCAL,
+
+      is_active: true,
     });
 
-    return {
-      _id: user._id,
-    };
+    return { _id: user._id };
   }
 
-  async findAll(query: string, current: number, pageSize: number) {
+  // ======================
+  // FIND ALL
+  // ======================
+  async findAll(query: string, current = 1, pageSize = 10) {
     const { filter, sort } = aqp(query);
-    if (filter.current) delete filter.current;
-    if (filter.pageSize) delete filter.pageSize;
 
-    if (!current) current = 1;
-    if (!pageSize) pageSize = 10;
+    delete filter.current;
+    delete filter.pageSize;
 
-    const totlalItems = (await this.userModel.find(filter)).length;
-    const totalPages = Math.ceil(totlalItems / pageSize);
-    const skip = (current - 1) * pageSize;
+    filter.is_deleted = false;
+
+    const totalItems = await this.userModel.countDocuments(filter);
 
     const results = await this.userModel
       .find(filter)
+      .skip((current - 1) * pageSize)
       .limit(pageSize)
-      .skip(skip)
       .select('-password')
       .sort(sort as any);
 
-    console.log('RESULTS:', results);
-    console.log('TOTAL PAGES:', totalPages);
-
-    return { results, totalPages };
+    return {
+      meta: {
+        current,
+        pageSize,
+        pages: Math.ceil(totalItems / pageSize),
+        total: totalItems,
+      },
+      results,
+    };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
-  }
-
+  // ======================
+  // FIND BY EMAIL
+  // ======================
   async findByEmail(email: string) {
-    return await this.userModel.findOne({ email });
+    return this.userModel
+      .findOne({ email, is_deleted: false })
+      .select('+password');
   }
 
-  async update(updateUserDto: UpdateUserDto) {
-    return await this.userModel.updateOne(
-      { _id: updateUserDto._id },
-      { ...updateUserDto },
+  // ======================
+  // FIND BY ID
+  // ======================
+  async findById(id: string) {
+    if (!mongoose.isValidObjectId(id)) {
+      throw new BadRequestException('Id không hợp lệ');
+    }
+
+    const user = await this.userModel
+      .findOne({ _id: id, is_deleted: false })
+      .select('-password');
+
+    if (!user) {
+      throw new BadRequestException('User không tồn tại');
+    }
+
+    return user;
+  }
+
+  // ======================
+  // UPDATE USER
+  // ======================
+  async update(dto: any) {
+    const { _id, name, email, phone } = dto;
+
+    if (!mongoose.isValidObjectId(_id)) {
+      throw new BadRequestException('Id không hợp lệ');
+    }
+
+    const user = await this.userModel.findOne({
+      _id,
+      is_deleted: false,
+    });
+
+    if (!user) {
+      throw new BadRequestException('User không tồn tại');
+    }
+
+    if (email && email !== user.email) {
+      const existed = await this.userModel.findOne({
+        email,
+        _id: { $ne: _id },
+        is_deleted: false,
+      });
+
+      if (existed) {
+        throw new BadRequestException('Email đã tồn tại');
+      }
+    }
+
+    await this.userModel.updateOne(
+      { _id },
+      {
+        ...(name && { name }),
+        ...(email && { email }),
+        ...(phone && { phone }),
+      },
     );
+
+    return { message: 'Update thành công' };
   }
 
+  // ======================
+  // SOFT DELETE
+  // ======================
   async remove(_id: string) {
-    // check id
-    if (mongoose.isValidObjectId(_id)) {
-      // delete
-      return this.userModel.deleteOne({ _id });
-    } else {
-      throw new BadRequestException('Id không đúng định dạng mongodb');
+    if (!mongoose.isValidObjectId(_id)) {
+      throw new BadRequestException('Id không hợp lệ');
     }
+
+    const user = await this.userModel.findOne({
+      _id,
+      is_deleted: false,
+    });
+
+    if (!user) {
+      throw new BadRequestException('User không tồn tại');
+    }
+
+    await this.userModel.updateOne(
+      { _id },
+      {
+        is_deleted: true,
+        deleted_at: new Date(),
+      },
+    );
+
+    return {
+      message: 'Xóa user thành công',
+      _id,
+    };
   }
 
-  async handleRegister(registerDto: CreateAuthDto) {
-    const { name, email, password } = registerDto;
+  // ======================
+  // REGISTER
+  // ======================
+  async handleRegister(dto: CreateAuthDto) {
+    const { name, email, password } = dto;
 
-    // check email
-    const isExist = await this.isEmailExist(email);
-    if (isExist === true) {
-      throw new BadRequestException(
-        `Email đã tồn tại: ${email}. Vui lòng sử dụng email khác.`,
-      );
+    if (await this.isEmailExist(email)) {
+      throw new BadRequestException('Email đã tồn tại');
     }
 
-    // hash password
     const hashPassword = await hashPasswordHelper(password);
-    const verification_code = uuidv4();
+    const code = uuidv4();
+
     const user = await this.userModel.create({
       name,
       email,
       password: hashPassword,
+
+      role: UserRole.USER,
+      account_type: AccountType.LOCAL,
+
       is_active: false,
-      verification_code: verification_code,
+      verification_code: code,
       verification_expires: new Date(Date.now() + 10 * 60 * 1000),
     });
 
-    // send email
     this.mailerService.sendMail({
       to: user.email,
       subject: 'Activate your account at @lyysstore',
       template: 'register',
       context: {
         name: user?.name ?? user.email,
-        activationCode: verification_code,
+        activationCode: code,
       },
     });
 
-    return {
-      _id: user._id,
-    };
+    return { _id: user._id };
   }
 
+  // ======================
+  // ACTIVE ACCOUNT
+  // ======================
   async handleActive(data: CodeAuthDto) {
     const user = await this.userModel.findOne({
       _id: data._id,
@@ -176,102 +274,99 @@ export class UsersService {
     };
   }
 
+  // ======================
+  // RETRY ACTIVE
+  // ======================
   async retryActive(email: string) {
-    // check email
-    const user = await this.userModel.findOne({ email });
-
-    if (!user) {
-      throw new BadRequestException('Email không tồn tại');
-    }
-    if (user.is_active) {
-      throw new BadRequestException('Tài khoản đã được kích hoạt');
-    }
-
-    const verification_code = uuidv4();
-
-    // update user
-    await user.updateOne({
-      verification_code: verification_code,
-      verification_expires: new Date(Date.now() + 10 * 60 * 1000),
+    const user = await this.userModel.findOne({
+      email,
+      is_deleted: false,
     });
 
-    // resend Email
-    this.mailerService.sendMail({
-      to: user.email,
-      subject: 'Activate your account at @lyysstore',
+    if (!user) throw new BadRequestException('Email không tồn tại');
+    if (user.is_active) throw new BadRequestException('Đã kích hoạt');
+
+    const code = uuidv4();
+
+    await this.userModel.updateOne(
+      { _id: user._id },
+      {
+        verification_code: code,
+        verification_expires: new Date(Date.now() + 10 * 60 * 1000),
+      },
+    );
+
+    await this.mailerService.sendMail({
+      to: email,
+      subject: 'Activate account',
       template: 'register',
       context: {
-        name: user?.name ?? user.email,
-        activationCode: verification_code,
+        name: user.name || email,
+        activationCode: code,
       },
     });
 
-    return {
-      _id: user._id,
-    };
+    return { _id: user._id };
   }
 
+  // ======================
+  // RETRY PASSWORD
+  // ======================
   async retryPassword(email: string) {
-    // check email
-    const user = await this.userModel.findOne({ email });
-
-    if (!user) {
-      throw new BadRequestException('Email không tồn tại');
-    }
-
-    const verification_code = uuidv4();
-
-    // update user
-    await user.updateOne({
-      verification_code: verification_code,
-      verification_expires: new Date(Date.now() + 10 * 60 * 1000),
+    const user = await this.userModel.findOne({
+      email,
+      is_deleted: false,
     });
 
-    // resend Email
-    this.mailerService.sendMail({
-      to: user.email,
-      subject: 'Change your password account at @lyysstore',
+    if (!user) throw new BadRequestException('Email không tồn tại');
+
+    const code = uuidv4();
+
+    await this.userModel.updateOne(
+      { _id: user._id },
+      {
+        verification_code: code,
+        verification_expires: new Date(Date.now() + 10 * 60 * 1000),
+      },
+    );
+
+    await this.mailerService.sendMail({
+      to: email,
+      subject: 'Reset password',
       template: 'register',
       context: {
-        name: user?.name ?? user.email,
-        activationCode: verification_code,
+        name: user.name || email,
+        activationCode: code,
       },
     });
 
-    return {
-      _id: user._id,
-      email: user.email,
-    };
+    return { _id: user._id, email };
   }
 
+  // ======================
+  // CHANGE PASSWORD
+  // ======================
   async changePassword(data: ChangePasswordAuthDto) {
-    // check confirm password
-    if (data.confirmPassword !== data.password) {
-      throw new BadRequestException('Mật khẩu và xác nhận mật khẩu không khớp');
+    if (data.password !== data.confirmPassword) {
+      throw new BadRequestException('Mật khẩu không khớp');
     }
 
-    // find user
     const user = await this.userModel.findOne({
       email: data.email,
       verification_code: data.code,
+      is_deleted: false,
     });
 
-    if (!user) {
-      throw new BadRequestException('Email hoặc mã xác thực không hợp lệ');
+    if (
+      !user ||
+      !user.verification_expires ||
+      new Date() > new Date(user.verification_expires)
+    ) {
+      throw new BadRequestException('Code không hợp lệ hoặc hết hạn');
     }
 
-    // check code expire
-    const isBeforeCheck =
-      new Date().getTime() < new Date(user.verification_expires).getTime();
-
-    if (!isBeforeCheck) {
-      throw new BadRequestException('Mã xác thực đã hết hạn');
-    }
-
-    // hash new password
     const newPassword = await hashPasswordHelper(data.password);
 
-    // update password
     await this.userModel.updateOne(
       { _id: user._id },
       {
@@ -281,8 +376,28 @@ export class UsersService {
       },
     );
 
-    return {
-      message: 'Đổi mật khẩu thành công',
-    };
+    return { message: 'Đổi mật khẩu thành công' };
+  }
+
+  // ======================
+  // UPDATE ROLE
+  // ======================
+  async updateRole(userId: string, role: UserRole) {
+    if (!mongoose.isValidObjectId(userId)) {
+      throw new BadRequestException('Invalid userId');
+    }
+
+    const user = await this.userModel.findOne({
+      _id: userId,
+      is_deleted: false,
+    });
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
+    await this.userModel.updateOne({ _id: userId }, { role });
+
+    return { message: 'Update role success' };
   }
 }

@@ -6,31 +6,45 @@ import {
   ExecutionContext,
   CallHandler,
 } from '@nestjs/common';
+
 import { Reflector } from '@nestjs/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-export interface Response<T> {
+
+export interface ApiResponse<T> {
   statusCode: number;
-  message?: string;
-  data: any;
+  message: string | null;
+  data: T;
+  timestamp: string;
+  path: string;
 }
+
 @Injectable()
 export class TransformInterceptor<T> implements NestInterceptor<
   T,
-  Response<T>
+  ApiResponse<T>
 > {
   constructor(private reflector: Reflector) {}
+
   intercept(
     context: ExecutionContext,
     next: CallHandler,
-  ): Observable<Response<T>> {
+  ): Observable<ApiResponse<T>> {
+    const http = context.switchToHttp();
+    const request = http.getRequest();
+    const response = http.getResponse();
+
+    const message =
+      this.reflector.get<string>(RESPONSE_MESSAGE, context.getHandler()) ||
+      null;
+
     return next.handle().pipe(
       map((data) => ({
-        statusCode: context.switchToHttp().getResponse().statusCode,
-        message:
-          this.reflector.get<string>(RESPONSE_MESSAGE, context.getHandler()) ||
-          '',
-        data: data,
+        statusCode: response.statusCode,
+        message,
+        data,
+        timestamp: new Date().toISOString(),
+        path: request.url,
       })),
     );
   }
