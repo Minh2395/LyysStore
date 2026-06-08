@@ -10,11 +10,11 @@ export default async function Home() {
   }
 
   if (role === "ADMIN") {
-    redirect("/admin/dashboard");
+    redirect("/dashboard");
   }
 
   if (role === "USER") {
-    redirect("/users/home");
+    redirect("/home");
   }
 
   return null;

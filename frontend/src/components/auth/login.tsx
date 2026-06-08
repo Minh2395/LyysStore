@@ -62,9 +62,9 @@ const Login = () => {
 
       // ✅ ROUTE THEO ROLE
       if (role === "ADMIN") {
-        router.push("/admin/dashboard");
+        router.push("/dashboard");
       } else {
-        router.push("/users/home");
+        router.push("/home");
       }
 
       router.refresh();
