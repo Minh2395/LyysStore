@@ -28,25 +28,54 @@ import { PagesModule } from './modules/pages/pages.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { JwtAuthGuard } from './auth/passport/jwt-auth.guard';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/adapters/handlebars.adapter';
+import { TransformInterceptor } from './core/transform.interceptor';
+import { RolesGuard } from './auth/passport/roles.guard';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
+      useFactory: (configService: ConfigService) => ({
         uri: configService.get<string>('MONGODB_URI'),
       }),
       inject: [ConfigService],
     }),
 
-    //Core modules
+    MailerModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        transport: {
+          host: 'smtp.gmail.com',
+          port: 465,
+          secure: true,
+          auth: {
+            user: configService.get('MAIL_USER'),
+            pass: configService.get('MAIL_PASSWORD'),
+          },
+        },
+        defaults: {
+          from: '"No Reply" <noreply@example.com>',
+        },
+        template: {
+          dir: process.cwd() + '/src/mail/templates',
+          adapter: new HandlebarsAdapter(),
+          options: { strict: true },
+        },
+      }),
+      inject: [ConfigService],
+    }),
+
     UsersModule,
     AuthModule,
     AddressesModule,
     AdminModule,
 
-    //Product modules
     CategoriesModule,
     UploadsModule,
     ProductsModule,
@@ -57,7 +86,6 @@ import { AdminModule } from './modules/admin/admin.module';
     StockOutModule,
     WarrantyModule,
 
-    //Order modules
     CartsModule,
     OrdersModule,
     PaymentsModule,
@@ -65,7 +93,6 @@ import { AdminModule } from './modules/admin/admin.module';
     CouponsModule,
     ShippingModule,
 
-    //Support modules
     ReviewsModule,
     WishlistModule,
     StoresModule,
@@ -73,7 +100,19 @@ import { AdminModule } from './modules/admin/admin.module';
     NotificationsModule,
     ReportsModule,
   ],
+
   controllers: [AppController],
-  providers: [AppService],
+
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TransformInterceptor,
+    },
+  ],
 })
 export class AppModule {}

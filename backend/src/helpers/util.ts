@@ -16,6 +16,7 @@ export const comparePasswordHelper = async (
   try {
     return await bcrypt.compare(plainPassword, hashPassword);
   } catch (error) {
-    console.log(error);
+    console.log('bcrypt compare error:', error);
+    return false;
   }
 };
