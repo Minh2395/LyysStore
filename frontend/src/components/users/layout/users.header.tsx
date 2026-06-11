@@ -1,0 +1,175 @@
+"use client";
+
+import Link from "next/link";
+import {
+  ShoppingCartOutlined,
+  BellOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
+import "@/static/css/users/users.header.css";
+import type { MenuProps } from "antd";
+
+const UsersHeader = () => {
+  const logoUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/logos/logo.png`;
+
+  const items: MenuProps["items"] = [
+    {
+      key: "settings",
+      label: "Settings",
+    },
+    {
+      type: "divider",
+    },
+    {
+      key: "logout",
+      danger: true,
+      label: "Đăng xuất",
+    },
+  ];
+
+  return (
+    <header className="users-header">
+      {/* Logo */}
+      <div className="header-left">
+        <Link href="/" className="logo">
+          <img src={logoUrl} alt="Lyys Store" className="logo-image" />
+
+          <div className="logo-content">
+            <span className="logo-text">Lyys Store</span>
+
+            <span className="logo-slogan">Modern Luxury Eyewear</span>
+          </div>
+        </Link>
+      </div>
+
+      {/* Menu */}
+      <nav className="header-nav">
+        <Link href="/">Trang chủ</Link>
+
+        {/* Gọng kính */}
+        <div className="nav-dropdown">
+          <span className="nav-link">Gọng kính</span>
+
+          <div className="dropdown-menu">
+            <div className="dropdown-column">
+              <h4>Tất cả</h4>
+
+              <Link href="/products">Tất cả gọng kính</Link>
+            </div>
+
+            <div className="dropdown-column">
+              <h4>Chất liệu</h4>
+
+              <Link href="/products/material/titanium">Titanium</Link>
+
+              <Link href="/products/material/acetate">Acetate</Link>
+
+              <Link href="/products/material/tr90">TR90</Link>
+
+              <Link href="/products/material/metal">Kim loại</Link>
+            </div>
+
+            <div className="dropdown-column">
+              <h4>Hình dáng</h4>
+
+              <Link href="/products/shape/round">Tròn</Link>
+
+              <Link href="/products/shape/square">Vuông</Link>
+
+              <Link href="/products/shape/rectangle">Chữ nhật</Link>
+
+              <Link href="/products/shape/oval">Oval</Link>
+
+              <Link href="/products/shape/cat-eye">Mắt mèo</Link>
+            </div>
+
+            <div className="dropdown-column">
+              <h4>Bộ sưu tập</h4>
+
+              <Link href="/collections/minimalist">Minimalist</Link>
+
+              <Link href="/collections/street-style">Street Style</Link>
+
+              <Link href="/collections/smart-casual">Smart Casual</Link>
+
+              <Link href="/collections/office-chic">Office Chic</Link>
+            </div>
+          </div>
+        </div>
+
+        {/* Tròng kính */}
+        <div className="nav-dropdown">
+          <span className="nav-link">Tròng kính</span>
+
+          <div className="dropdown-menu lens-dropdown">
+            <div className="dropdown-column">
+              <h4>Các loại tròng kính</h4>
+
+              <Link href="/lenses">Tất cả tròng kính</Link>
+
+              <Link href="/lenses/prescription">Kính cận, viễn, loạn</Link>
+
+              <Link href="/lenses/progressive">Kính đa tròng</Link>
+
+              <Link href="/lenses/thin">Tròng siêu mỏng</Link>
+
+              <Link href="/lenses/sunglasses">Kính mát</Link>
+
+              <Link href="/lenses/photochromic">Kính đổi màu</Link>
+
+              <Link href="/lenses/blue-light">Kính chống ánh sáng xanh</Link>
+            </div>
+          </div>
+        </div>
+
+        <Link href="/eye-exam">Đo mắt</Link>
+
+        <Link href="/stores">Cửa hàng</Link>
+
+        <Link href="/about">Giới thiệu</Link>
+      </nav>
+
+      {/* Search */}
+      <div className="header-center">
+        <form className="search-form">
+          <input
+            type="text"
+            placeholder="Tìm gọng kính phù hợp với bạn..."
+            className="search-input"
+          />
+
+          <button type="submit" className="search-button">
+            Tìm kiếm
+          </button>
+        </form>
+      </div>
+
+      {/* Actions */}
+      <div className="header-right">
+        <Link href="/notifications" className="header-icon">
+          <BellOutlined />
+        </Link>
+
+        <Link href="/cart" className="header-icon">
+          <ShoppingCartOutlined />
+        </Link>
+
+        <div className="user-menu">
+          <UserOutlined />
+
+          <div className="user-dropdown">
+            <Link href="/profile">Thông tin cá nhân</Link>
+
+            <Link href="/orders">Đơn hàng của tôi</Link>
+
+            <Link href="/wishlist">Yêu thích</Link>
+
+            <Link href="/logout">Đăng xuất</Link>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+};
+
+export default UsersHeader;

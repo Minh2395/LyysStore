@@ -9,6 +9,7 @@ export enum EntityType {
   CATEGORY = 'CATEGORY',
   USER = 'USER',
   BRAND = 'BRAND',
+  SYSTEM = 'SYSTEM',
 }
 
 export enum UploadType {

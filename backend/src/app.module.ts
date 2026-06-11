@@ -34,10 +34,17 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/adapters/handlebars.adapter';
 import { TransformInterceptor } from './core/transform.interceptor';
 import { RolesGuard } from './auth/passport/roles.guard';
+import { SettingsModule } from './modules/settings/settings.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads',
+    }),
 
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
@@ -75,6 +82,7 @@ import { RolesGuard } from './auth/passport/roles.guard';
     AuthModule,
     AddressesModule,
     AdminModule,
+    SettingsModule,
 
     CategoriesModule,
     UploadsModule,

@@ -54,7 +54,7 @@ const UserTable = () => {
       const accessToken = (session?.user as any)?.access_token;
 
       const res = await sendRequest<IBackendRes<IUserListResponse>>({
-        url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/users`,
+        url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/dashboard/users`,
         method: "GET",
         queryParams: {
           current,
