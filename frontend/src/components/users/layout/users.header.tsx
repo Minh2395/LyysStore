@@ -5,40 +5,36 @@ import {
   ShoppingCartOutlined,
   BellOutlined,
   UserOutlined,
+  SearchOutlined,
+  MenuOutlined,
+  CloseOutlined,
 } from "@ant-design/icons";
 import "@/static/css/users/users.header.css";
-import type { MenuProps } from "antd";
+import { useState } from "react";
 
 const UsersHeader = () => {
   const logoUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/logos/logo.png`;
 
-  const items: MenuProps["items"] = [
-    {
-      key: "settings",
-      label: "Settings",
-    },
-    {
-      type: "divider",
-    },
-    {
-      key: "logout",
-      danger: true,
-      label: "Đăng xuất",
-    },
-  ];
+  const [showSearch, setShowSearch] = useState(false);
+
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const [showFrameMenu, setShowFrameMenu] = useState(false);
+
+  const [showLensMenu, setShowLensMenu] = useState(false);
+
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
 
   return (
     <header className="users-header">
+      <div className="mobile-toggle" onClick={() => setMobileMenuOpen(true)}>
+        <MenuOutlined />
+      </div>
+
       {/* Logo */}
       <div className="header-left">
         <Link href="/" className="logo">
           <img src={logoUrl} alt="Lyys Store" className="logo-image" />
-
-          <div className="logo-content">
-            <span className="logo-text">Lyys Store</span>
-
-            <span className="logo-slogan">Modern Luxury Eyewear</span>
-          </div>
         </Link>
       </div>
 
@@ -126,23 +122,20 @@ const UsersHeader = () => {
 
         <Link href="/stores">Cửa hàng</Link>
 
-        <Link href="/about">Giới thiệu</Link>
+        <div className="nav-dropdown">
+          <span className="nav-link">Xem thêm</span>
+
+          <div className="dropdown-menu more-dropdown">
+            <div className="dropdown-column">
+              <Link href="/about">Về Lyys Store</Link>
+
+              <Link href="/news">Tin tức</Link>
+
+              <Link href="/blog">Blog</Link>
+            </div>
+          </div>
+        </div>
       </nav>
-
-      {/* Search */}
-      <div className="header-center">
-        <form className="search-form">
-          <input
-            type="text"
-            placeholder="Tìm gọng kính phù hợp với bạn..."
-            className="search-input"
-          />
-
-          <button type="submit" className="search-button">
-            Tìm kiếm
-          </button>
-        </form>
-      </div>
 
       {/* Actions */}
       <div className="header-right">
@@ -153,6 +146,29 @@ const UsersHeader = () => {
         <Link href="/cart" className="header-icon">
           <ShoppingCartOutlined />
         </Link>
+
+        {/* Search */}
+        <div className="header-center">
+          <div className="search-wrapper">
+            <button
+              className="search-icon-btn"
+              onClick={() => setShowSearch(!showSearch)}
+            >
+              <SearchOutlined />
+            </button>
+
+            {showSearch && (
+              <form className="search-form">
+                <input
+                  type="text"
+                  placeholder="Tìm gọng kính phù hợp với bạn..."
+                  className="search-input"
+                  autoFocus
+                />
+              </form>
+            )}
+          </div>
+        </div>
 
         <div className="user-menu">
           <UserOutlined />
@@ -168,6 +184,29 @@ const UsersHeader = () => {
           </div>
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      <div className={`mobile-sidebar ${mobileMenuOpen ? "active" : ""}`}>
+        <div className="mobile-close" onClick={() => setMobileMenuOpen(false)}>
+          <CloseOutlined />
+        </div>
+
+        <Link href="/">Trang chủ</Link>
+        <Link href="/products">Gọng kính</Link>
+        <Link href="/lenses">Tròng kính</Link>
+        <Link href="/eye-exam">Đo mắt</Link>
+        <Link href="/stores">Cửa hàng</Link>
+        <Link href="/about">Về Lyys Store</Link>
+        <Link href="/news">Tin tức</Link>
+        <Link href="/blog">Blog</Link>
+      </div>
+
+      {mobileMenuOpen && (
+        <div
+          className="mobile-overlay"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
     </header>
   );
 };

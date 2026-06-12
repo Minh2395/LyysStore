@@ -148,32 +148,121 @@
    RESPONSIVE
 ======================= */
 
-@media (max-width: 992px) {
+@media (max-width: 1200px) {
   .users-footer {
-    padding: 40px 30px 20px;
+    padding: 50px 40px 20px;
   }
 
   .footer-bottom {
     grid-template-columns: repeat(2, 1fr);
+    gap: 35px;
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 992px) {
+  .users-footer {
+    padding: 40px 25px 20px;
+  }
+
   .footer-top {
     flex-direction: column;
+    gap: 30px;
+  }
+
+  .footer-company-info {
+    min-width: unset;
   }
 
   .footer-contact {
-    flex-direction: column;
-    gap: 15px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 25px;
   }
 
   .footer-social {
     justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .footer-bottom {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+  }
+}
+
+@media (max-width: 768px) {
+  .users-footer {
+    padding: 35px 20px 20px;
+  }
+
+  .footer-company-info h3 {
+    font-size: 22px;
+  }
+
+  .footer-contact {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .footer-contact div {
+    padding-bottom: 15px;
+    border-bottom: 1px solid #374151;
+  }
+
+  .footer-social {
+    justify-content: center;
+    margin-top: 10px;
+  }
+
+  .footer-social a {
+    width: 46px;
+    height: 46px;
+    font-size: 18px;
   }
 
   .footer-bottom {
     grid-template-columns: 1fr;
-    gap: 30px;
+    gap: 25px;
+  }
+
+  .footer-company,
+  .footer-policy,
+  .footer-category,
+  .footer-connect {
+    padding-bottom: 20px;
+    border-bottom: 1px solid #374151;
+  }
+}
+
+@media (max-width: 480px) {
+  .users-footer {
+    padding: 30px 15px 15px;
+  }
+
+  .footer-company-info h3 {
+    font-size: 20px;
+  }
+
+  .footer-company-info p,
+  .footer-contact p,
+  .footer-company p,
+  .footer-policy li,
+  .footer-category li,
+  .ecommerce-icons a {
+    font-size: 14px;
+  }
+
+  .footer-social {
+    gap: 10px;
+  }
+
+  .footer-social a {
+    width: 42px;
+    height: 42px;
+    font-size: 16px;
+  }
+
+  .footer-bottom h3 {
+    font-size: 17px;
   }
 }

@@ -54,11 +54,11 @@ const UsersFooter = () => {
             <GlobalOutlined />
           </Link>
 
-          <Link href="#">
+          <Link href="https://www.facebook.com/lyys.store1/" target="_blank">
             <FacebookFilled />
           </Link>
 
-          <Link href="#">
+          <Link href="https://www.instagram.com/lyys.store1" target="_blank">
             <InstagramFilled />
           </Link>
         </div>
