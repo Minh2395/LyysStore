@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import "../../../static/css/users/users.content.home.css";
+import Link from "next/link";
 
 interface Product {
   _id: string;
@@ -110,7 +111,11 @@ export default function UsersContent() {
 
         <div className="product-carousel">
           {products.slice(0, 8).map((product) => (
-            <div key={product._id} className="product-card">
+            <Link
+              key={product._id}
+              href={`/products/${product._id}`}
+              className="product-card"
+            >
               <img
                 src={
                   product.image
@@ -123,7 +128,7 @@ export default function UsersContent() {
               <h3>{product.name}</h3>
 
               <strong>{product.base_price.toLocaleString("vi-VN")}₫</strong>
-            </div>
+            </Link>
           ))}
         </div>
       </section>
@@ -141,7 +146,11 @@ export default function UsersContent() {
 
         <div className="product-carousel">
           {products.slice(0, 10).map((product) => (
-            <div key={product._id} className="product-card">
+            <Link
+              key={product._id}
+              href={`/products/${product._id}`}
+              className="product-card"
+            >
               <img
                 src={
                   product.image
@@ -154,7 +163,7 @@ export default function UsersContent() {
               <h3>{product.name}</h3>
 
               <strong>{product.base_price.toLocaleString("vi-VN")}₫</strong>
-            </div>
+            </Link>
           ))}
         </div>
       </section>
