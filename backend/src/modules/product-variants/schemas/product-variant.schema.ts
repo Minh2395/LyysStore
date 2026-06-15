@@ -43,6 +43,13 @@ export class ProductVariant {
   cost_price: number;
 
   @Prop({
+    required: true,
+    min: 0,
+    default: 0,
+  })
+  stock: number;
+
+  @Prop({
     default: false,
   })
   is_default: boolean;

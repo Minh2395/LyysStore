@@ -1,7 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Types } from 'mongoose';
+
 import { User } from '../../users/schemas/user.schema';
-import { ProductVariant } from '../../product-variants/schemas/product-variant.schema';
+import { Product } from '../../products/schemas/product.schema';
 
 export type CartDocument = HydratedDocument<Cart>;
 
@@ -11,13 +12,14 @@ export enum CartStatus {
   ABANDONED = 'ABANDONED',
 }
 
-class CartItem {
+@Schema({ _id: false })
+export class CartItem {
   @Prop({
     type: Types.ObjectId,
-    ref: ProductVariant.name,
+    ref: Product.name,
     required: true,
   })
-  variant_id: Types.ObjectId;
+  product_id: Types.ObjectId;
 
   @Prop({
     required: true,
@@ -32,7 +34,12 @@ class CartItem {
   price: number;
 }
 
-@Schema({ timestamps: true, collection: 'carts' })
+export const CartItemSchema = SchemaFactory.createForClass(CartItem);
+
+@Schema({
+  timestamps: true,
+  collection: 'carts',
+})
 export class Cart {
   @Prop({ type: String })
   id: string;
@@ -46,7 +53,7 @@ export class Cart {
   user_id: Types.ObjectId;
 
   @Prop({
-    type: [CartItem],
+    type: [CartItemSchema],
     default: [],
   })
   items: CartItem[];

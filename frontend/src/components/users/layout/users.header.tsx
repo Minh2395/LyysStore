@@ -10,7 +10,8 @@ import {
   CloseOutlined,
 } from "@ant-design/icons";
 import "@/static/css/users/users.header.css";
-import { useState } from "react";
+import { useCart } from "../content/users.content.cart";
+import { useState, useEffect } from "react";
 
 const UsersHeader = () => {
   const logoUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/logos/logo.png`;
@@ -24,6 +25,8 @@ const UsersHeader = () => {
   const [showLensMenu, setShowLensMenu] = useState(false);
 
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+
+  const { total_quantity } = useCart();
 
   return (
     <header className="users-header">
@@ -143,8 +146,12 @@ const UsersHeader = () => {
           <BellOutlined />
         </Link>
 
-        <Link href="/cart" className="header-icon">
+        <Link href="/cart" className="header-icon cart-icon">
           <ShoppingCartOutlined />
+
+          {total_quantity > 0 && (
+            <span className="header-cart-badge">{total_quantity}</span>
+          )}
         </Link>
 
         {/* Search */}

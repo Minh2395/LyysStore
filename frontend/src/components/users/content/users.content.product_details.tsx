@@ -37,6 +37,52 @@ export default function UsersProductDetails({ product }: ProductDetailsProps) {
     store: false,
   });
 
+  const handleAddToCart = async () => {
+    try {
+      // 🔥 lấy session NextAuth đúng chuẩn
+      const resSession = await fetch("/api/auth/session");
+      const session = await resSession.json();
+
+      const token = session?.access_token || session?.user?.access_token;
+
+      console.log("SESSION DEBUG:", session);
+
+      if (!token) {
+        console.error("No token found in session");
+        alert("Bạn cần đăng nhập");
+        return;
+      }
+
+      const cleanToken = token.replace("Bearer ", "");
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/carts/add`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${cleanToken}`,
+          },
+          body: JSON.stringify({
+            product_id: product._id,
+            quantity,
+          }),
+        },
+      );
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        console.log("CART ERROR:", data);
+        throw new Error(data?.message || "Add to cart failed");
+      }
+
+      console.log("Cart OK:", data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const handleIncrease = () => {
     setQuantity((prev) => prev + 1);
   };
@@ -91,7 +137,6 @@ export default function UsersProductDetails({ product }: ProductDetailsProps) {
           ))}
         </div>
       </div>
-
       {/* ================= RIGHT ================= */}
       <div className="product-info">
         <h1 className="product-title">{product?.name}</h1>
@@ -155,12 +200,9 @@ export default function UsersProductDetails({ product }: ProductDetailsProps) {
             </button>
           </div>
 
-          <button className="add-cart">
+          <button className="add-cart" onClick={handleAddToCart}>
             <ShoppingCartOutlined />
-
             <span>Thêm vào giỏ hàng</span>
-
-            <span className="cart-badge">{quantity}</span>
           </button>
         </div>
 
@@ -249,13 +291,16 @@ export default function UsersProductDetails({ product }: ProductDetailsProps) {
             </span>
           ))}
         </div>
+      </div>
 
-        {/* ================= RELATED ================= */}
-        <div className="related">
-          <h3>Tròng kính bổ trợ & sản phẩm tương tự</h3>
+      {/* ================= LENS ================= */}
+      <div className="lens-section">
+        <h2>Tròng kính bổ trợ</h2>
 
-          <div className="related-list">
-            {product?.related?.map((item: any, idx: number) => (
+        <div className="related-list">
+          {(product?.lenses || product?.related || [])
+            .slice(0, 4)
+            .map((item: any, idx: number) => (
               <div key={idx} className="related-card">
                 <Image
                   src={
@@ -278,10 +323,36 @@ export default function UsersProductDetails({ product }: ProductDetailsProps) {
                 </div>
               </div>
             ))}
-          </div>
         </div>
       </div>
+      {/* ================= RELATED ================= */}
+      <div className="related-section">
+        <h2>Sản phẩm tương tự</h2>
 
+        <div className="related-list">
+          {(product?.related || []).map((item: any, idx: number) => (
+            <div key={idx} className="related-card">
+              <Image
+                src={
+                  item?.image
+                    ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${item.image}`
+                    : "/images/no-image.jpg"
+                }
+                alt={item?.name}
+                width={180}
+                height={180}
+                unoptimized
+              />
+
+              <div className="related-info">
+                <p>{item?.name}</p>
+
+                <span>{(item?.base_price ?? 0).toLocaleString("vi-VN")} ₫</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
       {/* ================= ZOOM ================= */}
       {zoom && (
         <div className="zoom-modal" onClick={() => setZoom(false)}>
