@@ -11,7 +11,9 @@ import {
 } from "@ant-design/icons";
 import "@/static/css/users/users.header.css";
 import { useCart } from "../content/users.content.cart";
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { signOut } from "next-auth/react";
+import type { MenuProps } from "antd";
 
 const UsersHeader = () => {
   const logoUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/logos/logo.png`;
@@ -27,6 +29,12 @@ const UsersHeader = () => {
   const [showMoreMenu, setShowMoreMenu] = useState(false);
 
   const { total_quantity } = useCart();
+
+  const handleMenuClick: MenuProps["onClick"] = (e) => {
+    if (e.key === "logout") {
+      signOut({ callbackUrl: "/auth/login" });
+    }
+  };
 
   return (
     <header className="users-header">
@@ -59,13 +67,13 @@ const UsersHeader = () => {
             <div className="dropdown-column">
               <h4>Chất liệu</h4>
 
-              <Link href="/products/material/titanium">Titanium</Link>
+              <Link href="/products/material/titanium">Gọng Titan</Link>
 
-              <Link href="/products/material/acetate">Acetate</Link>
+              <Link href="/products/material/acetate">Gọng Acetate</Link>
 
-              <Link href="/products/material/tr90">TR90</Link>
+              <Link href="/products/material/tr90">Gọng dẻo</Link>
 
-              <Link href="/products/material/metal">Kim loại</Link>
+              <Link href="/products/material/kim-loai">Gọng kim loại</Link>
             </div>
 
             <div className="dropdown-column">
@@ -189,7 +197,12 @@ const UsersHeader = () => {
 
             <Link href="/wishlist">Yêu thích</Link>
 
-            <Link href="/logout">Đăng xuất</Link>
+            <button
+              className="logout-btn"
+              onClick={() => signOut({ callbackUrl: "/auth/login" })}
+            >
+              Đăng xuất
+            </button>
           </div>
         </div>
       </div>

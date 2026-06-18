@@ -286,27 +286,43 @@
 
   display: flex;
   align-items: center;
+  justify-content: center;
 
   cursor: pointer;
 
   font-size: 22px;
 }
 
+/* Vùng đệm chống mất hover */
+.user-menu::after {
+  content: "";
+
+  position: absolute;
+  top: 100%;
+  right: 0;
+
+  width: 220px;
+  height: 15px;
+}
+
 .user-dropdown {
   position: absolute;
+
   right: 0;
-  top: 45px;
+  top: calc(100% + 15px);
 
   width: 220px;
 
   display: none;
 
   background: #fff;
-  border-radius: 10px;
+  border-radius: 12px;
 
   overflow: hidden;
 
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.12);
+
+  z-index: 999;
 }
 
 .user-menu:hover .user-dropdown {
@@ -315,33 +331,41 @@
 
 .user-dropdown a,
 .logout-btn {
-  display: block;
+  display: flex;
+  align-items: center;
 
   width: 100%;
-  padding: 12px 16px;
+
+  padding: 14px 18px;
 
   border: none;
   background: transparent;
 
   text-align: left;
-
   text-decoration: none;
+
   color: #333;
+  font-size: 14px;
+  font-weight: 500;
 
   cursor: pointer;
 
-  font-size: 14px;
-
-  transition: 0.3s;
+  transition: all 0.25s ease;
 }
 
 .user-dropdown a:hover,
 .logout-btn:hover {
-  background: #f5f5f5;
+  background: #f5f7fa;
+  color: #1677ff;
 }
 
 .logout-btn {
   color: #ff4d4f;
+}
+
+.logout-btn:hover {
+  color: #ff4d4f;
+  background: #fff1f0;
 }
 
 /* =========================

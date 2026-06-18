@@ -75,4 +75,32 @@ export class ProductsService {
       images: uploads.map((item) => item.url),
     };
   }
+
+  async findByCategorySlug(slug: string) {
+    const products = await this.productModel
+      .find({ status: ProductStatus.ACTIVE })
+      .populate('category_id')
+      .lean();
+
+    const uploads = await this.uploadModel.find({
+      entity_type: EntityType.PRODUCT,
+    });
+
+    const uploadMap = new Map<string, string>();
+
+    uploads.forEach((upload) => {
+      const key = upload.entity_id.toString();
+
+      if (!uploadMap.has(key)) {
+        uploadMap.set(key, upload.url);
+      }
+    });
+
+    return products
+      .filter((item: any) => item.category_id?.slug === slug)
+      .map((product) => ({
+        ...product,
+        image: uploadMap.get(product._id.toString()) || null,
+      }));
+  }
 }

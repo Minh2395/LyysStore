@@ -12,6 +12,12 @@ export class ProductsController {
     return this.productsService.findAll();
   }
 
+  @Get('material/:slug')
+  @Public()
+  findByCategorySlug(@Param('slug') slug: string) {
+    return this.productsService.findByCategorySlug(slug);
+  }
+
   @Get(':id')
   @Public()
   findOne(@Param('id') id: string) {
