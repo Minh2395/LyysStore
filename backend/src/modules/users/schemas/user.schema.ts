@@ -41,6 +41,12 @@ export class User {
   @Prop({ default: true })
   is_active: boolean;
 
+  @Prop({ default: false })
+  is_deleted: boolean;
+
+  @Prop({ type: Date, default: null })
+  deleted_at: Date;
+
   @Prop({ required: false })
   verification_code: string;
 

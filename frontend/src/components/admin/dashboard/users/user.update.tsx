@@ -5,20 +5,11 @@ import { Button, Form, Input, Modal, notification } from "antd";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 
-// ======================
-// TYPES
-// ======================
-
 interface IUser {
   _id: string;
   name: string;
   email: string;
   phone?: string;
-}
-
-interface IBackendRes<T> {
-  data?: T;
-  message?: string;
 }
 
 interface IProps {
@@ -34,9 +25,13 @@ const UserUpdate = ({ open, setOpen, reloadTable, dataUpdate }: IProps) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
-  // fill form when dataUpdate changes
+  const getToken = () => session?.access_token;
+
+  // ======================
+  // FILL FORM WHEN OPEN
+  // ======================
   useEffect(() => {
-    if (dataUpdate) {
+    if (open && dataUpdate) {
       form.setFieldsValue({
         _id: dataUpdate._id,
         name: dataUpdate.name,
@@ -44,52 +39,53 @@ const UserUpdate = ({ open, setOpen, reloadTable, dataUpdate }: IProps) => {
         phone: dataUpdate.phone,
       });
     }
-  }, [dataUpdate]);
 
+    if (!open) {
+      form.resetFields();
+    }
+  }, [open, dataUpdate]);
+
+  // ======================
+  // SUBMIT UPDATE
+  // ======================
   const onFinish = async (values: IUser) => {
-    setLoading(true);
+    const accessToken = getToken();
+    if (!accessToken) {
+      notification.error({
+        message: "Missing token",
+      });
+      return;
+    }
 
     try {
-      const accessToken = (session?.user as any)?.access_token;
+      setLoading(true);
 
       const payload = {
-        _id: values._id,
         name: values.name,
-        email: values.email, // FIXED BUG HERE
+        email: values.email,
         phone: values.phone,
       };
 
-      const res = await sendRequest<IBackendRes<any>>({
-        url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/users`,
+      const res = await sendRequest<any>({
+        url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/users/${values._id}`,
         method: "PATCH",
         body: payload,
-        headers: accessToken
-          ? {
-              Authorization: `Bearer ${accessToken}`,
-            }
-          : {},
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       });
 
-      if (res?.data) {
-        notification.success({
-          message: "Success",
-          description: "Update user successfully",
-        });
+      notification.success({
+        message: "Update success",
+      });
 
-        setOpen(false);
-        reloadTable?.();
-      } else {
-        notification.error({
-          message: "Error",
-          description: Array.isArray(res?.message)
-            ? res.message[0]
-            : res?.message || "Update failed",
-        });
-      }
+      setOpen(false);
+      form.resetFields();
+      reloadTable?.();
     } catch (err: any) {
       notification.error({
-        message: "System error",
-        description: err?.message || "Cannot connect to server",
+        message: "Update failed",
+        description: err?.message,
       });
     } finally {
       setLoading(false);
@@ -109,21 +105,14 @@ const UserUpdate = ({ open, setOpen, reloadTable, dataUpdate }: IProps) => {
           <Input />
         </Form.Item>
 
-        <Form.Item
-          label="Name"
-          name="name"
-          rules={[{ required: true, message: "Please enter name" }]}
-        >
+        <Form.Item label="Name" name="name" rules={[{ required: true }]}>
           <Input />
         </Form.Item>
 
         <Form.Item
           label="Email"
           name="email"
-          rules={[
-            { required: true, message: "Please enter email" },
-            { type: "email", message: "Invalid email format" },
-          ]}
+          rules={[{ required: true }, { type: "email" }]}
         >
           <Input />
         </Form.Item>
@@ -132,9 +121,11 @@ const UserUpdate = ({ open, setOpen, reloadTable, dataUpdate }: IProps) => {
           <Input />
         </Form.Item>
 
-        <Button type="primary" htmlType="submit" loading={loading} block>
-          Update
-        </Button>
+        <Form.Item>
+          <Button type="primary" htmlType="submit" loading={loading} block>
+            Update
+          </Button>
+        </Form.Item>
       </Form>
     </Modal>
   );

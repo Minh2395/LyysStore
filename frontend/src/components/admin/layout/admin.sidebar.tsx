@@ -4,9 +4,13 @@ import Layout from "antd/es/layout";
 import Menu from "antd/es/menu";
 import {
   AppstoreOutlined,
-  MailOutlined,
-  SettingOutlined,
-  TeamOutlined,
+  UserOutlined,
+  TagsOutlined,
+  ShoppingCartOutlined,
+  ShopOutlined,
+  PictureOutlined,
+  BarChartOutlined,
+  BankOutlined,
 } from "@ant-design/icons";
 
 import React from "react";
@@ -15,24 +19,31 @@ import type { MenuProps } from "antd";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+const { Sider } = Layout;
+
 type MenuItem = Required<MenuProps>["items"][number];
 
 const AdminSideBar = () => {
-  const { Sider } = Layout;
   const { collapseMenu } = useAdminContext();
   const pathname = usePathname();
 
-  // map route → selected key
+  // ===== ACTIVE ROUTE HANDLER (scalable)
   const getSelectedKey = () => {
-    if (pathname.includes("/dashboard/user")) return ["users"];
-    if (pathname === "/dashboard") return ["dashboard"];
+    if (pathname.startsWith("/dashboard")) return ["dashboard"];
+    if (pathname.startsWith("/dashboard/users")) return ["users"];
+    if (pathname.startsWith("/dashboard/categories")) return ["categories"];
+    if (pathname.startsWith("/dashboard/products")) return ["products"];
+    if (pathname.startsWith("/dashboard/orders")) return ["orders"];
+    if (pathname.startsWith("/dashboard/branches")) return ["branches"];
+    if (pathname.startsWith("/dashboard/media")) return ["media"];
+    if (pathname.startsWith("/dashboard/analytics")) return ["analytics"];
     return [];
   };
 
   const items: MenuItem[] = [
     {
       key: "grp",
-      label: "Hỏi Dân IT",
+      label: "Admin Panel",
       type: "group",
       children: [
         {
@@ -40,47 +51,88 @@ const AdminSideBar = () => {
           label: <Link href="/dashboard">Dashboard</Link>,
           icon: <AppstoreOutlined />,
         },
+
+        // USERS
         {
           key: "users",
-          label: <Link href="/dashboard/user">Manage Users</Link>,
-          icon: <TeamOutlined />,
+          label: <Link href="/dashboard/users">Users</Link>,
+          icon: <UserOutlined />,
         },
+
+        // CATEGORIES (nested)
         {
-          key: "sub1",
-          label: "Navigation One",
-          icon: <MailOutlined />,
+          key: "categories",
+          label: "Categories",
+          icon: <TagsOutlined />,
           children: [
             {
-              key: "g1",
-              label: "Item 1",
-              type: "group",
-              children: [
-                { key: "1", label: "Option 1" },
-                { key: "2", label: "Option 2" },
-              ],
+              key: "categories-list",
+              label: <Link href="/dashboard/categories">All Categories</Link>,
+            },
+            {
+              key: "categories-create",
+              label: (
+                <Link href="/dashboard/categories/create">Create Category</Link>
+              ),
             },
           ],
         },
+
+        // PRODUCTS (nested)
         {
-          key: "sub2",
-          label: "Navigation Two",
-          icon: <AppstoreOutlined />,
+          key: "products",
+          label: "Products",
+          icon: <ShoppingCartOutlined />,
           children: [
-            { key: "5", label: "Option 5" },
-            { key: "6", label: "Option 6" },
+            {
+              key: "products-list",
+              label: <Link href="/dashboard/products">All Products</Link>,
+            },
+            {
+              key: "products-create",
+              label: (
+                <Link href="/dashboard/products/create">Create Product</Link>
+              ),
+            },
           ],
         },
+
+        // ORDERS (theo user)
         {
-          type: "divider",
-        },
-        {
-          key: "sub4",
-          label: "Navigation Three",
-          icon: <SettingOutlined />,
+          key: "orders",
+          label: "Orders",
+          icon: <ShopOutlined />,
           children: [
-            { key: "9", label: "Option 9" },
-            { key: "10", label: "Option 10" },
+            {
+              key: "orders-list",
+              label: <Link href="/dashboard/orders">All Orders</Link>,
+            },
+            {
+              key: "orders-by-user",
+              label: <Link href="/dashboard/orders/user">By User</Link>,
+            },
           ],
+        },
+
+        // BRANCHES / STORES
+        {
+          key: "branches",
+          label: <Link href="/dashboard/branches">Branches</Link>,
+          icon: <BankOutlined />,
+        },
+
+        // MEDIA / IMAGES
+        {
+          key: "media",
+          label: <Link href="/dashboard/media">Images & Media</Link>,
+          icon: <PictureOutlined />,
+        },
+
+        // ANALYTICS
+        {
+          key: "analytics",
+          label: <Link href="/dashboard/analytics">Statistics</Link>,
+          icon: <BarChartOutlined />,
         },
       ],
     },
@@ -92,7 +144,7 @@ const AdminSideBar = () => {
         mode="inline"
         selectedKeys={getSelectedKey()}
         items={items}
-        style={{ height: "100vh" }}
+        style={{ height: "100vh", borderRight: 0 }}
       />
     </Sider>
   );
