@@ -33,13 +33,22 @@ import { JwtAuthGuard } from './auth/passport/jwt-auth.guard';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/adapters/handlebars.adapter';
 import { TransformInterceptor } from './core/transform.interceptor';
+import { RolesGuard } from './auth/passport/roles.guard';
+import { SettingsModule } from './modules/settings/settings.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads',
+    }),
+
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
+      useFactory: (configService: ConfigService) => ({
         uri: configService.get<string>('MONGODB_URI'),
       }),
       inject: [ConfigService],
@@ -47,14 +56,14 @@ import { TransformInterceptor } from './core/transform.interceptor';
 
     MailerModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
+      useFactory: (configService: ConfigService) => ({
         transport: {
           host: 'smtp.gmail.com',
           port: 465,
           secure: true,
           auth: {
-            user: configService.get<string>('MAIL_USER'),
-            pass: configService.get<string>('MAIL_PASSWORD'),
+            user: configService.get('MAIL_USER'),
+            pass: configService.get('MAIL_PASSWORD'),
           },
         },
         defaults: {
@@ -63,21 +72,18 @@ import { TransformInterceptor } from './core/transform.interceptor';
         template: {
           dir: process.cwd() + '/src/mail/templates',
           adapter: new HandlebarsAdapter(),
-          options: {
-            strict: true,
-          },
+          options: { strict: true },
         },
       }),
       inject: [ConfigService],
     }),
 
-    //Core modules
     UsersModule,
     AuthModule,
     AddressesModule,
     AdminModule,
+    SettingsModule,
 
-    //Product modules
     CategoriesModule,
     UploadsModule,
     ProductsModule,
@@ -88,7 +94,6 @@ import { TransformInterceptor } from './core/transform.interceptor';
     StockOutModule,
     WarrantyModule,
 
-    //Order modules
     CartsModule,
     OrdersModule,
     PaymentsModule,
@@ -96,7 +101,6 @@ import { TransformInterceptor } from './core/transform.interceptor';
     CouponsModule,
     ShippingModule,
 
-    //Support modules
     ReviewsModule,
     WishlistModule,
     StoresModule,
@@ -104,7 +108,9 @@ import { TransformInterceptor } from './core/transform.interceptor';
     NotificationsModule,
     ReportsModule,
   ],
+
   controllers: [AppController],
+
   providers: [
     AppService,
     {

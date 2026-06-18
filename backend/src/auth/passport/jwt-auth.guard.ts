@@ -3,9 +3,10 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+
 import { AuthGuard } from '@nestjs/passport';
-import { IS_PUBLIC_KEY } from '../../decorator/customize';
 import { Reflector } from '@nestjs/core';
+import { IS_PUBLIC_KEY } from '../../decorator/customize';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -18,24 +19,37 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
       context.getHandler(),
       context.getClass(),
     ]);
-    if (isPublic) {
-      return true;
-    }
-    // Add your custom authentication logic here
-    // for example, call super.logIn(request) to establish a session.
+
+    if (isPublic) return true;
+
     return super.canActivate(context);
   }
 
-  handleRequest(err, user, info) {
-    // You can throw an exception based on either "info" or "err" arguments
+  handleRequest<TUser = any>(err: any, user: any, info: any): TUser {
     if (err || !user) {
-      throw (
-        err ||
-        new UnauthorizedException(
-          'Access Token không hợp lệ hoặc không có tại header.',
-        )
-      );
+      const message = this.getErrorMessage(info);
+
+      throw new UnauthorizedException(message);
     }
+
     return user;
+  }
+
+  private getErrorMessage(info: any): string {
+    if (!info) return 'Access Token không hợp lệ';
+
+    switch (info.name) {
+      case 'TokenExpiredError':
+        return 'Access Token đã hết hạn';
+
+      case 'JsonWebTokenError':
+        return 'Access Token không hợp lệ';
+
+      case 'NotBeforeError':
+        return 'Token chưa có hiệu lực';
+
+      default:
+        return 'Unauthorized';
+    }
   }
 }

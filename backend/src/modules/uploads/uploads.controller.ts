@@ -1,34 +1,53 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
+
 import { UploadsService } from './uploads.service';
-import { CreateUploadDto } from './dto/create-upload.dto';
-import { UpdateUploadDto } from './dto/update-upload.dto';
+import { Public } from '../../decorator/customize';
 
 @Controller('uploads')
 export class UploadsController {
   constructor(private readonly uploadsService: UploadsService) {}
-
-  @Post()
-  create(@Body() createUploadDto: CreateUploadDto) {
-    return this.uploadsService.create(createUploadDto);
-  }
 
   @Get()
   findAll() {
     return this.uploadsService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.uploadsService.findOne(+id);
-  }
+  @Post('file')
+  @Public()
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, callback) => {
+          const uniqueName = Date.now() + extname(file.originalname);
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUploadDto: UpdateUploadDto) {
-    return this.uploadsService.update(+id, updateUploadDto);
-  }
+          callback(null, uniqueName);
+        },
+      }),
+    }),
+  )
+  uploadFile(@UploadedFile() file: Express.Multer.File) {
+    console.log('FILE = ', file);
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.uploadsService.remove(+id);
+    if (!file) {
+      return {
+        message: 'No file uploaded',
+      };
+    }
+
+    return {
+      filename: file.filename,
+      size: file.size,
+      url: `/uploads/${file.filename}`,
+    };
   }
 }

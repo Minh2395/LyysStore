@@ -1,34 +1,21 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Post, Get, Body, UseGuards, Req } from '@nestjs/common';
 import { CartsService } from './carts.service';
-import { CreateCartDto } from './dto/create-cart.dto';
-import { UpdateCartDto } from './dto/update-cart.dto';
 
+import { AddCartDto } from './dto/add-cart.dto';
+import { JwtAuthGuard } from '../../auth/passport/jwt-auth.guard';
 @Controller('carts')
 export class CartsController {
   constructor(private readonly cartsService: CartsService) {}
 
-  @Post()
-  create(@Body() createCartDto: CreateCartDto) {
-    return this.cartsService.create(createCartDto);
+  @Post('add')
+  @UseGuards(JwtAuthGuard)
+  addToCart(@Req() req, @Body() dto: AddCartDto) {
+    return this.cartsService.addToCart(req.user._id, dto);
   }
 
   @Get()
-  findAll() {
-    return this.cartsService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.cartsService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCartDto: UpdateCartDto) {
-    return this.cartsService.update(+id, updateCartDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.cartsService.remove(+id);
+  @UseGuards(JwtAuthGuard)
+  getCart(@Req() req) {
+    return this.cartsService.getCart(req.user._id);
   }
 }

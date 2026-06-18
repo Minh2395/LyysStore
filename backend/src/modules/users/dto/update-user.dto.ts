@@ -1,13 +1,43 @@
-import { IsMongoId, IsNotEmpty, IsOptional } from 'class-validator';
+import {
+  IsEmail,
+  IsOptional,
+  IsString,
+  MinLength,
+  IsEnum,
+} from 'class-validator';
+
+import { AccountType, UserRole } from '../schemas/user.schema';
 
 export class UpdateUserDto {
-  @IsMongoId({ message: '_id không hợp lệ' })
-  @IsNotEmpty({ message: '_id không được để trống' })
-  _id: string;
+  @IsOptional()
+  @IsString()
+  name?: string;
 
   @IsOptional()
-  name: string;
+  @IsEmail({}, { message: 'email không đúng định dạng' })
+  email?: string;
 
   @IsOptional()
-  phone: string;
+  @IsString()
+  @MinLength(6, { message: 'password phải ít nhất 6 ký tự' })
+  password?: string;
+
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @IsOptional()
+  @IsEnum(AccountType, {
+    message: 'account_type phải là LOCAL, GOOGLE hoặc FACEBOOK',
+  })
+  account_type?: AccountType;
+
+  @IsOptional()
+  @IsEnum(UserRole, {
+    message: 'role phải là USER, ADMIN hoặc STAFF',
+  })
+  role?: UserRole;
+
+  @IsOptional()
+  is_active?: boolean;
 }

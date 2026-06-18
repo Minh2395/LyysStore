@@ -1,5 +1,4 @@
 <html>
-
   <head>
     <title>Lyys Store - Email Xác Thực Tài Khoản</title>
     <meta http-equiv='Content-Type' content='text/html; charset=UTF-8' />
@@ -7,72 +6,81 @@
   </head>
 
   <body
-    style='margin: 0; padding: 0; min-width: 100%; font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; background-color: #FAFAFA; color: #222222;'
+    style='margin:0;padding:0;font-family:Arial,sans-serif;background:#FAFAFA;color:#222'
   >
 
-    <div style='max-width: 600px; margin: 0 auto;'>
+    <!-- PREHEADER (anti-spam + preview text) -->
+    <div style='display:none;max-height:0;overflow:hidden;'>
+      Xác thực tài khoản Lyys Store của bạn
+    </div>
 
-      <!-- Header -->
-      <div style='background-color: #0d6efd; padding: 24px; color: #ffffff;'>
-        <h1
-          style='font-size: 24px; font-weight: 700; margin: 0; text-align: center;'
-        >
-          Lyys Store
-        </h1>
+    <div style='max-width:600px;margin:0 auto;'>
+
+      <!-- HEADER -->
+      <div
+        style='background:#0d6efd;padding:24px;color:#fff;text-align:center;'
+      >
+        <h1 style='margin:0;font-size:24px;'>Lyys Store</h1>
       </div>
 
-      <!-- Body -->
-      <div style='padding: 24px; background-color: #ffffff;'>
+      <!-- BODY -->
+      <div style='background:#fff;padding:24px;'>
 
-        <p style='margin-top: 0; margin-bottom: 24px;'>
-          Xin chào
-          {{name}},
+        <p>Xin chào <b>{{name}}</b>,</p>
+
+        <p>
+          Cảm ơn bạn đã đăng ký tài khoản tại Lyys Store. Vui lòng sử dụng mã
+          xác thực bên dưới để kích hoạt tài khoản:
         </p>
 
-        <p style='margin-top: 0; margin-bottom: 24px;'>
-          Cảm ơn bạn đã đăng ký tài khoản tại Lyys Store. Để kích hoạt tài
-          khoản, vui lòng sử dụng mã xác thực bên dưới:
-        </p>
-
-        <h2
-          style='font-size: 22px; font-weight: 700; margin: 0 0 24px 0; text-align: center; letter-spacing: 2px;'
+        <!-- OTP BOX -->
+        <div
+          style='text-align:center;font-size:28px;font-weight:bold;
+          letter-spacing:6px;margin:24px 0;padding:16px;
+          border:1px dashed #0d6efd;border-radius:8px;'
         >
           {{activationCode}}
-        </h2>
+        </div>
 
-        <p style='margin-top: 0; margin-bottom: 24px;'>
-          Vui lòng nhập mã này trong trang kích hoạt tài khoản trong vòng
-          <b>10 phút</b>.
+        <p style='text-align:center;color:#666;'>
+          Mã có hiệu lực trong
+          <b>10 phút</b>
         </p>
 
-        <p style='margin-top: 0; margin-bottom: 24px;'>
-          Nếu bạn không đăng ký tài khoản tại Lyys Store, vui lòng bỏ qua email
-          này.
+        <!-- CTA BUTTON (improved UX) -->
+        <div style='text-align:center;margin-top:24px;'>
+          <a
+            href='https://lyysstore.vn/verify'
+            style='background:#0d6efd;color:#fff;padding:12px 24px;
+            text-decoration:none;border-radius:6px;display:inline-block;'
+          >
+            Xác thực tài khoản
+          </a>
+        </div>
+
+        <p style='margin-top:24px;color:#666;font-size:14px;'>
+          Nếu bạn không đăng ký tài khoản, vui lòng bỏ qua email này.
         </p>
 
       </div>
 
-      <!-- Footer -->
-      <div style='background-color: #f6f6f6; padding: 24px; font-size: 14px;'>
+      <!-- FOOTER -->
+      <div
+        style='background:#f6f6f6;padding:24px;font-size:13px;text-align:center;'
+      >
 
-        <p style='margin-top: 0; margin-bottom: 12px;'>
-          Nếu bạn cần hỗ trợ, vui lòng liên hệ:
-        </p>
+        <p style='margin:0 0 8px 0;'>Cần hỗ trợ?</p>
 
-        <p style='margin: 0;'>
-          <a
-            href='https://lyysstore.vn'
-            target='_blank'
-            style='color: #0d6efd; text-decoration: none; font-weight: 600;'
-          >
-            https://lyysstore.vn
-          </a>
-        </p>
+        <a
+          href='https://lyysstore.vn'
+          style='color:#0d6efd;text-decoration:none;font-weight:600;'
+        >
+          lyysstore.vn
+        </a>
 
       </div>
 
     </div>
 
   </body>
-
 </html>

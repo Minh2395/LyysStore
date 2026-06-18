@@ -1,0 +1,320 @@
+/* =========================
+   ROOT VARIABLES
+========================= */
+:root {
+  --primary: #2563eb;
+  --primary-light: #eff6ff;
+
+  --text: #111827;
+  --text-soft: #6b7280;
+
+  --border: #e5e7eb;
+  --bg: #f9fafb;
+
+  --card-bg: #ffffff;
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.08);
+  --shadow-hover: 0 10px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* =========================
+   LAYOUT
+========================= */
+.store-layout {
+  display: flex;
+  gap: 24px;
+  padding: 24px;
+
+  background: var(--bg);
+  min-height: 100vh;
+
+  align-items: flex-start;
+}
+
+/* =========================
+   LEFT PANEL
+========================= */
+.store-list {
+  width: 35%;
+  max-height: 80vh;
+
+  overflow-y: auto;
+  padding-right: 10px;
+
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary) transparent;
+}
+
+/* Chrome scrollbar */
+.store-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.store-list::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 10px;
+}
+
+.store-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* =========================
+   TITLE
+========================= */
+.store-title {
+  margin-bottom: 18px;
+
+  font-size: 22px;
+  font-weight: 700;
+
+  color: var(--text);
+  letter-spacing: 0.2px;
+}
+
+/* =========================
+   STORE CARD BASE
+========================= */
+.store-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+
+  border-radius: 14px;
+
+  padding: 14px 16px;
+  margin-bottom: 14px;
+
+  cursor: pointer;
+
+  transition: all 0.25s ease;
+
+  box-shadow: var(--shadow-sm);
+
+  position: relative;
+  overflow: hidden;
+}
+
+/* subtle hover animation background */
+.store-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(37, 99, 235, 0.05),
+    transparent
+  );
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.store-card:hover::before {
+  transform: translateX(100%);
+}
+
+/* hover effect */
+.store-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+  border-color: rgba(37, 99, 235, 0.4);
+}
+
+/* =========================
+   ACTIVE CARD
+========================= */
+.store-card.active {
+  border: 2px solid var(--primary);
+  background: var(--primary-light);
+
+  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.18);
+}
+
+/* active indicator line */
+.store-card.active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 10%;
+  bottom: 10%;
+  width: 4px;
+  background: var(--primary);
+  border-radius: 10px;
+}
+
+/* =========================
+   STORE TEXT
+========================= */
+.store-name {
+  margin: 0 0 6px;
+
+  font-size: 16px;
+  font-weight: 600;
+
+  color: var(--text);
+}
+
+.store-text {
+  margin: 0;
+
+  font-size: 13px;
+  line-height: 1.5;
+
+  color: var(--text-soft);
+}
+
+/* icons spacing */
+.store-text + .store-text {
+  margin-top: 4px;
+}
+
+/* =========================
+   RIGHT MAP
+========================= */
+.store-map {
+  width: 65%;
+  height: 80vh;
+
+  border-radius: 18px;
+  overflow: hidden;
+
+  background: #fff;
+
+  box-shadow: var(--shadow-md);
+
+  position: sticky;
+  top: 20px;
+}
+
+/* iframe */
+.map-frame {
+  border: none;
+  width: 100%;
+  height: 100%;
+}
+
+/* =========================
+   EMPTY STATE
+========================= */
+.map-empty {
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  color: var(--text-soft);
+  font-size: 14px;
+
+  gap: 8px;
+}
+
+/* empty icon placeholder */
+.map-empty::before {
+  content: "📍";
+  font-size: 28px;
+}
+
+/* =========================
+   SCROLL UX IMPROVEMENT
+========================= */
+.store-list {
+  scroll-behavior: smooth;
+}
+
+/* =========================
+   RESPONSIVE TABLET
+========================= */
+@media (max-width: 1024px) {
+  .store-layout {
+    flex-direction: column;
+  }
+
+  .store-list {
+    width: 100%;
+    max-height: 300px;
+  }
+
+  .store-map {
+    width: 100%;
+    height: 400px;
+    position: relative;
+    top: auto;
+  }
+}
+
+/* =========================
+   MOBILE
+========================= */
+@media (max-width: 600px) {
+  .store-layout {
+    padding: 12px;
+    gap: 16px;
+  }
+
+  .store-title {
+    font-size: 18px;
+  }
+
+  .store-card {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .store-name {
+    font-size: 15px;
+  }
+
+  .store-text {
+    font-size: 12px;
+  }
+}
+
+/* =========================
+   LOADING STATE (optional)
+========================= */
+.store-card.loading {
+  background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  color: transparent;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* =========================
+   FOCUS ACCESSIBILITY
+========================= */
+.store-card:focus {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* =========================
+   MICRO INTERACTIONS
+========================= */
+.store-card:active {
+  transform: scale(0.98);
+}
+
+/* =========================
+   DIVIDER EFFECT (OPTIONAL)
+========================= */
+.store-card:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  bottom: -7px;
+  left: 10%;
+  width: 80%;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.04);
+}

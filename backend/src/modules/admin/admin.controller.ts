@@ -1,34 +1,32 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { AdminService } from './admin.service';
-import { CreateAdminDto } from './dto/create-admin.dto';
-import { UpdateAdminDto } from './dto/update-admin.dto';
+import {
+  Controller,
+  Patch,
+  Body,
+  UseGuards,
+  ForbiddenException,
+  Req,
+} from '@nestjs/common';
+
+import { Roles } from '../../decorator/customize';
+import { JwtAuthGuard } from '../../auth/passport/jwt-auth.guard';
+import { RolesGuard } from '../../auth/passport/roles.guard';
+
+import { UsersService } from '../users/users.service';
+import { SetRoleDto } from './dto/set-role.dto';
+import { UserRole } from '../users/schemas/user.schema';
 
 @Controller('admin')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles(UserRole.ADMIN)
 export class AdminController {
-  constructor(private readonly adminService: AdminService) {}
+  constructor(private usersService: UsersService) {}
 
-  @Post()
-  create(@Body() createAdminDto: CreateAdminDto) {
-    return this.adminService.create(createAdminDto);
-  }
+  @Patch('users/role')
+  async setRole(@Body() body: SetRoleDto, @Req() req: any) {
+    if (req?.user?._id === body.userId) {
+      throw new ForbiddenException('Không thể thay đổi role của chính mình');
+    }
 
-  @Get()
-  findAll() {
-    return this.adminService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.adminService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAdminDto: UpdateAdminDto) {
-    return this.adminService.update(+id, updateAdminDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.adminService.remove(+id);
+    return this.usersService.updateRole(body.userId, body.role);
   }
 }

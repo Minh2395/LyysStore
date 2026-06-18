@@ -1,81 +1,116 @@
-import queryString from 'query-string';
+import queryString from "query-string";
 
-export const sendRequest = async <T>(props: IRequest) => { //type
-    let {
-        url,
-        method,
-        body,
-        queryParams = {},
-        useCredentials = false,
-        headers = {},
-        nextOption = {}
-    } = props;
+export interface IRequest {
+  url: string;
+  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+  body?: any;
+  queryParams?: Record<string, any>;
+  useCredentials?: boolean;
+  headers?: Record<string, string>;
+  nextOption?: RequestInit;
+}
 
-    const options: any = {
-        method: method,
-        // by default setting the content-type to be json type
-        headers: new Headers({ 'content-type': 'application/json', ...headers }),
-        body: body ? JSON.stringify(body) : null,
-        ...nextOption
-    };
-    if (useCredentials) options.credentials = "include";
+// ======================
+// JSON REQUEST
+// ======================
+export const sendRequest = async <T>(props: IRequest): Promise<T> => {
+  let {
+    url,
+    method,
+    body,
+    queryParams = {},
+    useCredentials = false,
+    headers = {},
+    nextOption = {},
+  } = props;
 
-    if (queryParams) {
-        url = `${url}?${queryString.stringify(queryParams)}`;
-    }
+  // query params safe
+  if (queryParams && Object.keys(queryParams).length > 0) {
+    url += `?${queryString.stringify(queryParams)}`;
+  }
 
-    return fetch(url, options).then(res => {
-        if (res.ok) {
-            return res.json() as T; //generic
-        } else {
-            return res.json().then(function (json) {
-                // to be able to access error status when you catch the error 
-                return {
-                    statusCode: res.status,
-                    message: json?.message ?? "",
-                    error: json?.error ?? ""
-                } as T;
-            });
-        }
-    });
+  const options: RequestInit = {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+      ...headers,
+    },
+    ...nextOption,
+  };
+
+  // attach body safely
+  if (body && method !== "GET") {
+    options.body = JSON.stringify(body);
+  }
+
+  if (useCredentials) {
+    options.credentials = "include";
+  }
+
+  const res = await fetch(url, options);
+
+  const text = await res.text();
+  const data = text ? JSON.parse(text) : null;
+
+  if (!res.ok) {
+  const error = new Error(data?.message || "Request failed") as any;
+
+  error.statusCode = res.status;
+  error.error = data?.error || "";
+
+  throw error;
+}
+
+  return data as T;
 };
 
-export const sendRequestFile = async <T>(props: IRequest) => { //type
-    let {
-        url,
-        method,
-        body,
-        queryParams = {},
-        useCredentials = false,
-        headers = {},
-        nextOption = {}
-    } = props;
+// ======================
+// FILE UPLOAD REQUEST
+// ======================
+export const sendRequestFile = async <T>(props: IRequest): Promise<T> => {
+  let {
+    url,
+    method,
+    body,
+    queryParams = {},
+    useCredentials = false,
+    headers = {},
+    nextOption = {},
+  } = props;
 
-    const options: any = {
-        method: method,
-        // by default setting the content-type to be json type
-        headers: new Headers({ ...headers }),
-        body: body ? body : null,
-        ...nextOption
+  // query params safe
+  if (queryParams && Object.keys(queryParams).length > 0) {
+    url += `?${queryString.stringify(queryParams)}`;
+  }
+
+  const options: RequestInit = {
+    method,
+    headers: {
+      ...headers,
+    },
+    ...nextOption,
+  };
+
+  if (body) {
+    options.body = body;
+  }
+
+  if (useCredentials) {
+    options.credentials = "include";
+  }
+
+  const res = await fetch(url, options);
+
+  const text = await res.text();
+  const data = text ? JSON.parse(text) : null;
+
+  if (!res.ok) {
+    throw {
+      statusCode: res.status,
+      message: data?.message || "Request failed",
+      error: data?.error || "",
     };
-    if (useCredentials) options.credentials = "include";
+  }
 
-    if (queryParams) {
-        url = `${url}?${queryString.stringify(queryParams)}`;
-    }
-
-    return fetch(url, options).then(res => {
-        if (res.ok) {
-            return res.json() as T; //generic
-        } else {
-            return res.json().then(function (json) {
-                // to be able to access error status when you catch the error 
-                return {
-                    statusCode: res.status,
-                    message: json?.message ?? "",
-                    error: json?.error ?? ""
-                } as T;
-            });
-        }
-    });
+  return data as T;
 };
