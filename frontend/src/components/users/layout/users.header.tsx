@@ -150,7 +150,9 @@ const UsersHeader = () => {
           <ShoppingCartOutlined />
 
           {total_quantity > 0 && (
-            <span className="header-cart-badge">{total_quantity}</span>
+            <span className="header-cart-badge">
+              {total_quantity > 99 ? "99+" : total_quantity}
+            </span>
           )}
         </Link>
 

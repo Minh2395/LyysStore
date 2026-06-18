@@ -149,6 +149,87 @@
 }
 
 /* =========================
+   ICONS
+========================= */
+
+.header-icon,
+.user-menu {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  position: relative;
+
+  width: 42px;
+  height: 42px;
+
+  border-radius: 50%;
+
+  color: #111;
+  font-size: 20px;
+
+  transition: 0.25s;
+}
+
+.header-icon:hover,
+.user-menu:hover {
+  background: #f5f7fa;
+  color: #1677ff;
+}
+
+/* =========================
+   CART BADGE
+========================= */
+
+.cart-icon {
+  position: relative;
+}
+
+.header-cart-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+
+  min-width: 20px;
+  height: 20px;
+
+  padding: 0 6px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 999px;
+
+  background: linear-gradient(135deg, #ff4d4f, #ff7875);
+
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+
+  border: 2px solid #fff;
+
+  box-shadow: 0 4px 12px rgba(255, 77, 79, 0.35);
+
+  animation: cartPulse 2s infinite;
+}
+
+@keyframes cartPulse {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.12);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* =========================
    SEARCH
 ========================= */
 .header-center {

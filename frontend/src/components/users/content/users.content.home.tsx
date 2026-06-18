@@ -34,7 +34,11 @@ export default function UsersContent() {
   const [bannerIndex, setBannerIndex] = useState(0);
   const [feedbackIndex, setFeedbackIndex] = useState(0);
 
-  const banners = ["/images/banner/banner1.jpg", "/images/banner/banner2.jpg"];
+  const banners =
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/banners/banner1.png,${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/banners/banner2.png`.split(
+      ",",
+    );
+  const exploreStores = `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/stores/explore_stores.jpg`;
 
   const feedbacks: Feedback[] = [
     {
@@ -193,7 +197,7 @@ export default function UsersContent() {
       {/* ================= STORE ================= */}
       <section className="store-section">
         <div className="store-image">
-          <img src="/images/store/store.jpg" />
+          <img src={exploreStores} />
         </div>
 
         <div className="store-content">

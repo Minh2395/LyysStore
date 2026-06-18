@@ -1,0 +1,351 @@
+/* =========================================
+   ABOUT PAGE
+========================================= */
+
+.about-container {
+  width: 100%;
+  max-width: 1280px; /* cùng kích thước content của header/footer */
+  margin: 0 auto;
+  padding: 60px 20px 100px;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+.about-container * {
+  box-sizing: border-box;
+}
+
+/* =========================================
+   SECTION
+========================================= */
+
+.about-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 80px;
+  margin-bottom: 120px;
+}
+
+.about-row.reverse {
+  flex-direction: row-reverse;
+}
+
+/* =========================================
+   CONTENT
+========================================= */
+
+.about-content {
+  flex: 1;
+}
+
+.about-content h2 {
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: #111;
+  margin-bottom: 30px;
+  position: relative;
+  line-height: 1.3;
+}
+
+.about-content h2::after {
+  content: "";
+  display: block;
+  width: 80px;
+  height: 4px;
+  background: #000;
+  border-radius: 20px;
+  margin-top: 15px;
+}
+
+.about-content p {
+  font-size: 1rem;
+  line-height: 1.9;
+  color: #555;
+  text-align: justify;
+  margin-bottom: 18px;
+}
+
+/* =========================================
+   IMAGE BLOCK
+========================================= */
+
+.about-images {
+  flex: 1;
+  display: flex;
+  gap: 25px;
+}
+
+.about-images img,
+.store-image img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 22px;
+  object-fit: cover;
+  transition: all 0.4s ease;
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12);
+}
+
+.about-images img:hover,
+.store-image img:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 25px 55px rgba(0, 0, 0, 0.18);
+}
+
+.store-image {
+  flex: 1;
+}
+
+/* =========================================
+   SOCIAL MEDIA
+========================================= */
+
+.social-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.social-card {
+  padding: 35px;
+  border-radius: 24px;
+  color: #fff;
+  text-decoration: none;
+  transition: all 0.35s ease;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+}
+
+.social-card:hover {
+  transform: translateY(-6px);
+}
+
+.social-card h3 {
+  font-size: 1.6rem;
+  margin-bottom: 8px;
+}
+
+.social-card span {
+  font-size: 1rem;
+  opacity: 0.95;
+}
+
+.instagram {
+  background: linear-gradient(
+    135deg,
+    #f58529,
+    #feda77,
+    #dd2a7b,
+    #8134af,
+    #515bd4
+  );
+}
+
+.facebook {
+  background: linear-gradient(135deg, #1877f2, #63a4ff);
+}
+
+.tiktok {
+  background: linear-gradient(135deg, #000000, #222222);
+}
+
+/* =========================================
+   CUSTOMER
+========================================= */
+
+.customer-section {
+  text-align: center;
+}
+
+.customer-section h2 {
+  font-size: 2.5rem;
+  margin-bottom: 25px;
+  color: #111;
+}
+
+.customer-desc {
+  max-width: 900px;
+  margin: 0 auto 70px;
+  line-height: 1.9;
+  color: #666;
+}
+
+.customer-slider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+}
+
+.main-image img {
+  width: 450px;
+  height: 550px;
+  object-fit: cover;
+  border-radius: 30px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
+}
+
+.side-image img {
+  width: 180px;
+  height: 260px;
+  object-fit: cover;
+  border-radius: 20px;
+  opacity: 0.45;
+  filter: grayscale(20%);
+}
+
+.customer-section h3 {
+  margin-top: 35px;
+  font-size: 1.8rem;
+  color: #111;
+}
+
+/* =========================================
+   DOTS
+========================================= */
+
+.slider-dots {
+  margin-top: 25px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border: none;
+  border-radius: 999px;
+  background: #d9d9d9;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.dot.active {
+  width: 34px;
+  background: #111;
+}
+
+/* =========================================
+   DESKTOP LARGE
+========================================= */
+
+@media (max-width: 1200px) {
+  .about-row {
+    gap: 50px;
+  }
+
+  .main-image img {
+    width: 380px;
+    height: 470px;
+  }
+}
+
+/* =========================================
+   TABLET
+========================================= */
+
+@media (max-width: 992px) {
+  .about-row,
+  .about-row.reverse {
+    flex-direction: column;
+    gap: 40px;
+    margin-bottom: 90px;
+  }
+
+  .about-content {
+    width: 100%;
+  }
+
+  .about-images,
+  .store-image,
+  .social-group {
+    width: 100%;
+  }
+
+  .customer-slider {
+    gap: 18px;
+  }
+
+  .main-image img {
+    width: 320px;
+    height: 420px;
+  }
+
+  .side-image img {
+    width: 130px;
+    height: 190px;
+  }
+}
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 768px) {
+  .about-container {
+    padding: 50px 18px 80px;
+  }
+
+  .about-images {
+    flex-direction: column;
+  }
+
+  .about-content h2 {
+    font-size: 1.8rem;
+  }
+
+  .customer-section h2 {
+    font-size: 2rem;
+  }
+
+  .customer-slider {
+    flex-direction: column;
+  }
+
+  .side-image {
+    display: none;
+  }
+
+  .main-image img {
+    width: 100%;
+    max-width: 340px;
+    height: auto;
+  }
+
+  .social-card {
+    padding: 25px;
+  }
+
+  .social-card h3 {
+    font-size: 1.3rem;
+  }
+}
+
+/* =========================================
+   SMALL MOBILE
+========================================= */
+
+@media (max-width: 480px) {
+  .about-content h2 {
+    font-size: 1.5rem;
+  }
+
+  .about-content p,
+  .customer-desc {
+    font-size: 0.95rem;
+  }
+
+  .customer-section h2 {
+    font-size: 1.6rem;
+  }
+
+  .customer-section h3 {
+    font-size: 1.3rem;
+  }
+
+  .social-card {
+    padding: 20px;
+  }
+}
