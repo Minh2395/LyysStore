@@ -1,26 +1,106 @@
 import { Injectable } from '@nestjs/common';
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+
+import {
+  Product,
+  ProductDocument,
+  ProductStatus,
+} from './schemas/product.schema';
+
+import {
+  Upload,
+  UploadDocument,
+  EntityType,
+} from '../uploads/schemas/upload.schema';
 
 @Injectable()
 export class ProductsService {
-  create(createProductDto: CreateProductDto) {
-    return 'This action adds a new product';
+  constructor(
+    @InjectModel(Product.name)
+    private productModel: Model<ProductDocument>,
+
+    @InjectModel(Upload.name)
+    private uploadModel: Model<UploadDocument>,
+  ) {}
+
+  async findAll() {
+    const products = await this.productModel
+      .find({ status: ProductStatus.ACTIVE })
+      .populate('category_id')
+      .sort({ _id: -1 })
+      .lean();
+
+    const uploads = await this.uploadModel.find({
+      entity_type: 'PRODUCT',
+    });
+
+    const uploadMap = new Map<string, string>();
+
+    uploads.forEach((upload) => {
+      const key = upload.entity_id.toString();
+
+      // chỉ lấy ảnh đầu tiên làm thumbnail
+      if (!uploadMap.has(key)) {
+        uploadMap.set(key, upload.url);
+      }
+    });
+
+    return products.map((product) => {
+      return {
+        ...product,
+        image: uploadMap.get(product._id.toString()) || null,
+      };
+    });
   }
 
-  findAll() {
-    return `This action returns all products`;
+  async findOne(id: string) {
+    const product = await this.productModel
+      .findById(id)
+      .populate('category_id')
+      .lean();
+
+    if (!product) {
+      return null;
+    }
+
+    const uploads = await this.uploadModel.find({
+      entity_type: EntityType.PRODUCT,
+      entity_id: product._id,
+    });
+
+    return {
+      ...product,
+      image: uploads[0]?.url || null,
+      images: uploads.map((item) => item.url),
+    };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
-  }
+  async findByCategorySlug(slug: string) {
+    const products = await this.productModel
+      .find({ status: ProductStatus.ACTIVE })
+      .populate('category_id')
+      .lean();
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`;
-  }
+    const uploads = await this.uploadModel.find({
+      entity_type: EntityType.PRODUCT,
+    });
 
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+    const uploadMap = new Map<string, string>();
+
+    uploads.forEach((upload) => {
+      const key = upload.entity_id.toString();
+
+      if (!uploadMap.has(key)) {
+        uploadMap.set(key, upload.url);
+      }
+    });
+
+    return products
+      .filter((item: any) => item.category_id?.slug === slug)
+      .map((product) => ({
+        ...product,
+        image: uploadMap.get(product._id.toString()) || null,
+      }));
   }
 }

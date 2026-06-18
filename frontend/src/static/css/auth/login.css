@@ -1,0 +1,359 @@
+/* =========================
+   LOGIN PAGE
+========================= */
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  background:
+    radial-gradient(circle at top left, #e0f2fe, transparent 35%),
+    radial-gradient(circle at bottom right, #dbeafe, transparent 35%), #f8fafc;
+}
+
+/* =========================
+   LEFT BANNER
+========================= */
+.login-banner {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-banner-image {
+  width: 100%;
+  height: 100vh;
+  object-fit: cover;
+  transform: scale(1.02);
+  transition: transform 8s ease;
+}
+
+.login-page:hover .login-banner-image {
+  transform: scale(1.08);
+}
+
+.login-banner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0.15),
+    rgba(0, 0, 0, 0.35)
+  );
+}
+
+/* =========================
+   RIGHT CONTENT
+========================= */
+.login-content {
+  width: 560px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px);
+
+  padding: 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  box-shadow:
+    0 25px 50px rgba(0, 0, 0, 0.08),
+    0 10px 20px rgba(0, 0, 0, 0.04);
+
+  border-left: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+/* =========================
+   TITLE
+========================= */
+.login-title {
+  margin-bottom: 35px;
+}
+
+.login-title h2 {
+  font-size: 38px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 12px;
+}
+
+.login-title p {
+  color: #64748b;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+/* =========================
+   FORM
+========================= */
+.login-form .ant-form-item-label > label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #374151;
+  letter-spacing: 0.5px;
+}
+
+.login-form .ant-input,
+.login-form .ant-input-password {
+  height: 54px;
+  border-radius: 14px;
+  border: 1px solid #d9e2f2;
+  background: #fafcff;
+  transition: all 0.3s ease;
+}
+
+.login-form .ant-input-password .ant-input {
+  height: 100%;
+  background: transparent;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.login-form .ant-input:hover,
+.login-form .ant-input-password:hover {
+  border-color: #3b82f6;
+}
+
+.login-form .ant-input:focus,
+.login-form .ant-input-focused,
+.login-form .ant-input-password-focused {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12) !important;
+}
+
+/* =========================
+   REMEMBER
+========================= */
+.remember-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.remember-row input {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.remember-row label {
+  font-size: 14px;
+  color: #4b5563;
+  cursor: pointer;
+}
+
+/* =========================
+   LOGIN BUTTON
+========================= */
+.login-btn {
+  height: 56px !important;
+  border-radius: 14px !important;
+
+  font-size: 16px;
+  font-weight: 700;
+
+  background: linear-gradient(135deg, #2563eb, #3b82f6) !important;
+
+  border: none !important;
+
+  box-shadow: 0 10px 25px rgba(37, 99, 235, 0.25);
+
+  transition: all 0.3s ease;
+}
+
+.login-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 20px 35px rgba(37, 99, 235, 0.35);
+}
+
+/* =========================
+   FORGOT PASSWORD
+========================= */
+.forgot-password {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.forgot-password .ant-btn-link {
+  padding: 0;
+  color: #1677ff;
+  font-weight: 500;
+}
+
+/* =========================
+   SOCIAL LOGIN
+========================= */
+.social-login {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.social-login button {
+  height: 52px !important;
+  border-radius: 12px !important;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.google-btn {
+  background: #fff !important;
+  border: 1px solid #e2e8f0 !important;
+
+  height: 54px !important;
+
+  transition: all 0.3s ease;
+}
+
+.google-btn:hover {
+  transform: translateY(-2px);
+  border-color: #2563eb !important;
+}
+
+.facebook-btn {
+  height: 54px !important;
+
+  background: linear-gradient(135deg, #1877f2, #0f5ed7) !important;
+
+  border: none !important;
+
+  transition: all 0.3s ease;
+}
+
+.facebook-btn:hover {
+  transform: translateY(-2px);
+}
+
+.google-btn .anticon,
+.facebook-btn .anticon {
+  margin-right: 10px;
+  font-size: 18px;
+}
+
+/* =========================
+   REGISTER
+========================= */
+.register-link {
+  margin-top: 25px;
+  text-align: center;
+}
+
+.register-link p {
+  margin-bottom: 8px;
+  color: #6b7280;
+}
+
+.register-link a {
+  color: #1677ff;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.register-link a:hover {
+  text-decoration: underline;
+}
+
+/* =========================
+   BACK HOME
+========================= */
+.back-home {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.back-home a {
+  color: #4b5563;
+  text-decoration: none;
+  font-weight: 500;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  transition: 0.3s;
+}
+
+.back-home a:hover {
+  color: #1677ff;
+}
+
+/* =========================
+   DIVIDER
+========================= */
+.ant-divider-horizontal.ant-divider-with-text {
+  margin: 28px 0;
+}
+
+/* =========================
+   TABLET
+========================= */
+@media (max-width: 1024px) {
+  .login-content {
+    width: 450px;
+    padding: 40px;
+  }
+
+  .login-title h2 {
+    font-size: 30px;
+  }
+}
+
+/* =========================
+   MOBILE
+========================= */
+@media (max-width: 768px) {
+  .login-page {
+    flex-direction: column;
+  }
+
+  .login-banner {
+    height: 220px;
+    flex: none;
+  }
+
+  .login-banner-image {
+    height: 220px;
+  }
+
+  .login-content {
+    width: 100%;
+    min-height: auto;
+    padding: 30px 24px;
+    border-radius: 30px 30px 0 0;
+    margin-top: -20px;
+    position: relative;
+    z-index: 10;
+  }
+
+  .login-title {
+    text-align: center;
+  }
+
+  .login-title h2 {
+    font-size: 28px;
+  }
+
+  .login-title p {
+    font-size: 14px;
+  }
+}
+
+/* =========================
+   SMALL MOBILE
+========================= */
+@media (max-width: 480px) {
+  .login-content {
+    padding: 25px 18px;
+  }
+
+  .login-title h2 {
+    font-size: 24px;
+  }
+
+  .login-form .ant-input,
+  .login-form .ant-input-password,
+  .login-btn,
+  .social-login button {
+    height: 48px !important;
+  }
+}

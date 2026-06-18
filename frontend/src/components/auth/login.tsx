@@ -1,11 +1,13 @@
 "use client";
 
-import { Button, Col, Divider, Form, Input, notification, Row } from "antd";
+import { Button, Divider, Form, Input, notification } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import "../../static/css/auth/login.css";
+import { GoogleOutlined, FacebookFilled } from "@ant-design/icons";
 
 import ModalReactive from "./modal.reactive";
 import ModalChangePassword from "./modal.change.password";
@@ -80,67 +82,118 @@ const Login = () => {
 
   return (
     <>
-      <Row justify="center" style={{ marginTop: 30 }}>
-        <Col xs={24} md={16} lg={8}>
-          <fieldset
-            style={{ padding: 15, border: "1px solid #ccc", borderRadius: 5 }}
+      <div className="login-page">
+        {/* Banner bên trái */}
+        <div className="login-banner">
+          <img
+            src="/images/login-banner.jpg"
+            alt="Login Banner"
+            className="login-banner-image"
+          />
+        </div>
+
+        {/* Form bên phải */}
+        <div className="login-content">
+          <div className="login-title">
+            <h2>Đăng nhập</h2>
+            <p>Hãy đăng nhập để được hưởng đặc quyền riêng dành cho bạn</p>
+          </div>
+
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={onFinish}
+            autoComplete="off"
+            className="login-form"
           >
-            <legend>Đăng Nhập</legend>
-
-            <Form
-              form={form}
-              layout="vertical"
-              onFinish={onFinish}
-              autoComplete="off"
+            <Form.Item
+              label="TÀI KHOẢN"
+              name="email"
+              rules={[
+                {
+                  required: true,
+                  message: "Vui lòng nhập email!",
+                },
+              ]}
             >
-              <Form.Item
-                label="Email"
-                name="email"
-                rules={[
-                  { required: true, message: "Please input your email!" },
-                ]}
-              >
-                <Input />
-              </Form.Item>
+              <Input placeholder="Nhập tài khoản" />
+            </Form.Item>
 
-              <Form.Item
-                label="Password"
-                name="password"
-                rules={[
-                  { required: true, message: "Please input your password!" },
-                ]}
-              >
-                <Input.Password />
-              </Form.Item>
+            <Form.Item
+              label="MẬT KHẨU"
+              name="password"
+              rules={[
+                {
+                  required: true,
+                  message: "Vui lòng nhập mật khẩu!",
+                },
+              ]}
+            >
+              <Input.Password placeholder="Nhập mật khẩu" />
+            </Form.Item>
 
-              <Form.Item>
-                <div
-                  style={{ display: "flex", justifyContent: "space-between" }}
-                >
-                  <Button type="primary" htmlType="submit" loading={loading}>
-                    Login
-                  </Button>
-
-                  <Button type="link" onClick={() => setChangePassword(true)}>
-                    Quên mật khẩu ?
-                  </Button>
-                </div>
-              </Form.Item>
-            </Form>
-
-            <Link href="/">
-              <ArrowLeftOutlined /> Quay lại trang chủ
-            </Link>
-
-            <Divider />
-
-            <div style={{ textAlign: "center" }}>
-              Chưa có tài khoản?{" "}
-              <Link href="/auth/register">Đăng ký tại đây</Link>
+            <div className="remember-row">
+              <input type="checkbox" id="remember" />
+              <label htmlFor="remember">Lưu tài khoản</label>
             </div>
-          </fieldset>
-        </Col>
-      </Row>
+
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={loading}
+              block
+              className="login-btn"
+            >
+              Đăng nhập
+            </Button>
+          </Form>
+
+          <div className="forgot-password">
+            <Button type="link" onClick={() => setChangePassword(true)}>
+              Quên mật khẩu ?
+            </Button>
+          </div>
+
+          <Divider>
+            <span style={{ color: "#999" }}>Hoặc</span>
+          </Divider>
+
+          <div className="social-login">
+            <Button
+              block
+              size="large"
+              className="google-btn"
+              onClick={() => signIn("google")}
+            >
+              <GoogleOutlined />
+              Đăng nhập bằng Google
+            </Button>
+
+            <Button
+              block
+              size="large"
+              className="facebook-btn"
+              onClick={() => signIn("facebook")}
+            >
+              <FacebookFilled />
+              Đăng nhập bằng Facebook
+            </Button>
+          </div>
+
+          <div className="register-link">
+            <p>Bạn chưa có tài khoản?</p>
+
+            <Link href="/auth/register">Đăng ký ngay</Link>
+          </div>
+
+          <div className="back-home">
+            <Link href="/">
+              <ArrowLeftOutlined />
+              Quay lại trang chủ
+            </Link>
+          </div>
+        </div>
+      </div>
 
       <ModalReactive
         isModalOpen={isModalOpen}

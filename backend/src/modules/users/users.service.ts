@@ -295,11 +295,11 @@ export class UsersService {
     );
 
     await this.mailerService.sendMail({
-      to: email,
+      to: user.email,
       subject: 'Activate account',
       template: 'register',
       context: {
-        name: user.name || email,
+        name: user?.name ?? user.email,
         activationCode: code,
       },
     });
@@ -313,10 +313,9 @@ export class UsersService {
   async retryPassword(email: string) {
     const user = await this.userModel.findOne({
       email,
-      is_deleted: false,
     });
 
-    if (!user) throw new BadRequestException('Email không tồn tại');
+    if (!user?.email) throw new BadRequestException('Email không tồn tại');
 
     const code = uuidv4();
 
@@ -329,16 +328,16 @@ export class UsersService {
     );
 
     await this.mailerService.sendMail({
-      to: email,
+      to: user.email,
       subject: 'Reset password',
       template: 'register',
       context: {
-        name: user.name || email,
+        name: user?.name ?? user.email,
         activationCode: code,
       },
     });
 
-    return { _id: user._id, email };
+    return { _id: user._id, email: user.email };
   }
 
   // ======================
