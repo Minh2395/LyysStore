@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import "../../../static/css/products/products.content.css";
+import "../../../static/css/products/products.content.material.css";
 
 interface Props {
   slug: string;
