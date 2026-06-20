@@ -43,6 +43,9 @@ export class CategoriesService {
     return category;
   }
 
+  // ======================
+  // UPDATE CATEGORY
+  // ======================
   async update(id: string, updateCategoryDto: UpdateCategoryDto) {
     const category = await this.categoryModel.findByIdAndUpdate(
       id,
@@ -56,7 +59,10 @@ export class CategoriesService {
       throw new NotFoundException('Category not found');
     }
 
-    return category;
+    return {
+      message: 'Updated successfully',
+      data: category,
+    };
   }
 
   // ======================

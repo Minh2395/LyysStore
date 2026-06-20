@@ -7,6 +7,7 @@ import { useSession } from "next-auth/react";
 import { sendRequest } from "@/utils/api";
 import CategoriesCreate from "./categories.create";
 import CategoryDelete from "./categories.delete";
+import CategoryUpdate from "./categories.update";
 
 interface ICategory {
   _id: string;
@@ -35,6 +36,9 @@ export default function CategoryChildrenPage() {
   const [children, setChildren] = useState<ICategory[]>([]);
 
   const [openCreate, setOpenCreate] = useState(false);
+
+  const [openUpdate, setOpenUpdate] = useState(false);
+  const [dataUpdate, setDataUpdate] = useState<ICategory | null>(null);
 
   const [openDelete, setOpenDelete] = useState(false);
   const [dataDelete, setDataDelete] = useState<ICategory | null>(null);
@@ -129,10 +133,11 @@ export default function CategoryChildrenPage() {
           <Button
             type="link"
             onClick={() => {
-              console.log(record);
+              setOpenUpdate(true);
+              setDataUpdate(record);
             }}
           >
-            View
+            Update
           </Button>
 
           <Button
@@ -205,6 +210,13 @@ export default function CategoryChildrenPage() {
         setOpen={setOpenDelete}
         dataDelete={dataDelete}
         reloadTable={fetchData}
+      />
+
+      <CategoryUpdate
+        open={openUpdate}
+        setOpen={setOpenUpdate}
+        reloadTable={fetchData}
+        dataUpdate={dataUpdate}
       />
     </>
   );

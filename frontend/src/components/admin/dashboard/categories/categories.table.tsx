@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { sendRequest } from "@/utils/api";
 import CategoriesCreate from "./categories.create";
 import CategoryDelete from "./categories.delete";
+import CategoryUpdate from "./categories.update";
 
 interface ICategory {
   _id: string;
@@ -34,6 +35,9 @@ const CategoryTable = () => {
 
   const [openDelete, setOpenDelete] = useState(false);
   const [dataDelete, setDataDelete] = useState<ICategory | null>(null);
+
+  const [openUpdate, setOpenUpdate] = useState(false);
+  const [dataUpdate, setDataUpdate] = useState<ICategory | null>(null);
 
   const [current, setCurrent] = useState(1);
   const [pageSize, setPageSize] = useState(10);
@@ -154,7 +158,8 @@ const CategoryTable = () => {
           <Button
             type="link"
             onClick={() => {
-              console.log("EDIT:", record);
+              setOpenUpdate(true);
+              setDataUpdate(record);
             }}
           >
             Edit
@@ -228,6 +233,13 @@ const CategoryTable = () => {
         setOpen={setOpenDelete}
         dataDelete={dataDelete}
         reloadTable={() => fetchCategories(getToken()!)}
+      />
+
+      <CategoryUpdate
+        open={openUpdate}
+        setOpen={setOpenUpdate}
+        reloadTable={() => fetchCategories(getToken()!)}
+        dataUpdate={dataUpdate}
       />
     </>
   );

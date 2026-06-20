@@ -13,11 +13,11 @@ import {
   BankOutlined,
 } from "@ant-design/icons";
 
-import React from "react";
 import { useAdminContext } from "@/library/admin.context";
 import type { MenuProps } from "antd";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import "../../../static/css/admin/admin.sidebar.css";
 
 const { Sider } = Layout;
 
@@ -127,13 +127,8 @@ const AdminSideBar = () => {
   ];
 
   return (
-    <Sider collapsed={collapseMenu}>
-      <Menu
-        mode="inline"
-        selectedKeys={getSelectedKey()}
-        items={items}
-        style={{ height: "100vh", borderRight: 0 }}
-      />
+    <Sider className="admin-sidebar" collapsed={collapseMenu} width={260}>
+      <Menu mode="inline" selectedKeys={getSelectedKey()} items={items} />
     </Sider>
   );
 };

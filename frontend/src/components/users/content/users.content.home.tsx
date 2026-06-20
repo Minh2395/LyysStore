@@ -39,6 +39,9 @@ export default function UsersContent() {
       ",",
     );
   const exploreStores = `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/stores/explore_stores.jpg`;
+  const collections1 = `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/banners/collections/casual.png`;
+  const collections2 = `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/banners/collections/street_style.png`;
+  const collections3 = `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/banners/collections/office_chic.png`;
 
   const feedbacks: Feedback[] = [
     {
@@ -209,12 +212,12 @@ export default function UsersContent() {
 
       {/* ================= COLLECTION ================= */}
       <section className="collection-section">
-        <h2>COLLECTION</h2>
+        <h2>COLLECTIONS</h2>
 
         <div className="collection-grid">
-          <img src="/images/collection/c1.jpg" />
-          <img src="/images/collection/c2.jpg" />
-          <img src="/images/collection/c3.jpg" />
+          <img src={collections1} />
+          <img src={collections2} />
+          <img src={collections3} />
         </div>
       </section>
     </main>
