@@ -36,7 +36,7 @@ export default function UsersContentMaterial({ slug }: Props) {
     const fetchProducts = async () => {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/products/shape/${slug}`,
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/products/collections/${slug}`,
         );
 
         const result = await res.json();

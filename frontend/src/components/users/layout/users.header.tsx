@@ -12,7 +12,7 @@ import {
 import "@/static/css/users/users.header.css";
 import { useCart } from "../content/users.content.cart";
 import { useState } from "react";
-import { signOut } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import type { MenuProps } from "antd";
 
 const UsersHeader = () => {
@@ -30,6 +30,8 @@ const UsersHeader = () => {
 
   const { total_quantity } = useCart();
 
+  const { data: session, status } = useSession();
+
   const handleMenuClick: MenuProps["onClick"] = (e) => {
     if (e.key === "logout") {
       signOut({ callbackUrl: "/auth/login" });
@@ -44,14 +46,14 @@ const UsersHeader = () => {
 
       {/* Logo */}
       <div className="header-left">
-        <Link href="/" className="logo">
+        <Link href="/home" className="logo">
           <img src={logoUrl} alt="Lyys Store" className="logo-image" />
         </Link>
       </div>
 
       {/* Menu */}
       <nav className="header-nav">
-        <Link href="/">Trang chủ</Link>
+        <Link href="/home">Trang chủ</Link>
 
         {/* Gọng kính */}
         <div className="nav-dropdown">
@@ -93,13 +95,17 @@ const UsersHeader = () => {
             <div className="dropdown-column">
               <h4>Bộ sưu tập</h4>
 
-              <Link href="/collections/minimalist">Minimalist</Link>
+              <Link href="/products/collections/minimalist">Minimalist</Link>
 
-              <Link href="/collections/street-style">Street Style</Link>
+              <Link href="/products/collections/street-style">
+                Street Style
+              </Link>
 
-              <Link href="/collections/smart-casual">Smart Casual</Link>
+              <Link href="/products/collections/smart-casual">
+                Smart Casual
+              </Link>
 
-              <Link href="/collections/office-chic">Office Chic</Link>
+              <Link href="/products/collections/office-chic">Office Chic</Link>
             </div>
           </div>
         </div>
@@ -187,24 +193,31 @@ const UsersHeader = () => {
           </div>
         </div>
 
-        <div className="user-menu">
-          <UserOutlined />
+        {status === "authenticated" ? (
+          <div className="user-menu">
+            <UserOutlined />
 
-          <div className="user-dropdown">
-            <Link href="/profile">Thông tin cá nhân</Link>
+            <div className="user-dropdown">
+              <Link href="/profile">Thông tin cá nhân</Link>
+              <Link href="/orders">Đơn hàng của tôi</Link>
+              <Link href="/wishlist">Yêu thích</Link>
 
-            <Link href="/orders">Đơn hàng của tôi</Link>
-
-            <Link href="/wishlist">Yêu thích</Link>
-
-            <button
-              className="logout-btn"
-              onClick={() => signOut({ callbackUrl: "/auth/login" })}
-            >
-              Đăng xuất
-            </button>
+              <button
+                className="logout-btn"
+                onClick={() => signOut({ callbackUrl: "/home" })}
+              >
+                Đăng xuất
+              </button>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="user-menu">
+            <Link href="/auth/login" className="login-btn">
+              <UserOutlined />
+              <span>Đăng nhập</span>
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Mobile Menu */}

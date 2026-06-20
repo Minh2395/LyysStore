@@ -25,6 +25,8 @@ export class ProductsController {
   }
 
   @Get('material/:slug')
+  @Get('shape/:slug')
+  @Get('collections/:slug')
   @Public()
   findByCategorySlug(@Param('slug') slug: string) {
     return this.productsService.findByCategorySlug(slug);

@@ -293,6 +293,29 @@
   font-size: 22px;
 }
 
+.user-menu .login-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  padding: 6px 10px;
+
+  font-size: 14px;
+  font-weight: 500;
+
+  color: #333;
+  text-decoration: none;
+
+  border-radius: 8px;
+
+  transition: all 0.25s ease;
+}
+
+.user-menu .login-btn:hover {
+  color: #1677ff;
+  background: #f5f7fa;
+}
+
 /* Vùng đệm chống mất hover */
 .user-menu::after {
   content: "";
