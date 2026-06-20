@@ -59,11 +59,16 @@ export class UsersService {
 
       role: UserRole.USER,
       account_type: AccountType.LOCAL,
-
       is_active: true,
     });
 
-    return { _id: user._id };
+    return {
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      role: user.role,
+    };
   }
 
   // ======================
@@ -167,29 +172,23 @@ export class UsersService {
   }
 
   // ======================
-  // SOFT DELETE
+  // HARD DELETE
   // ======================
   async remove(_id: string) {
     if (!mongoose.isValidObjectId(_id)) {
       throw new BadRequestException('Id không hợp lệ');
     }
 
-    const user = await this.userModel.findOne({
+    const result = await this.userModel.deleteOne({
       _id,
-      is_deleted: false,
     });
 
-    if (!user) {
-      throw new BadRequestException('User không tồn tại');
-    }
+    console.log(typeof _id, _id);
+    console.log('DELETE RESULT:', result);
 
-    await this.userModel.updateOne(
-      { _id },
-      {
-        is_deleted: true,
-        deleted_at: new Date(),
-      },
-    );
+    if (result.deletedCount === 0) {
+      throw new BadRequestException('User không tồn tại hoặc đã bị xóa');
+    }
 
     return {
       message: 'Xóa user thành công',
@@ -243,6 +242,7 @@ export class UsersService {
     const user = await this.userModel.findOne({
       _id: data._id,
       verification_code: data.code,
+      is_deleted: false,
     });
 
     if (!user) {
