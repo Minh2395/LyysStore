@@ -191,7 +191,7 @@ export class UsersService {
     }
 
     return {
-      message: 'Xóa user thành công (hard delete)',
+      message: 'Xóa user thành công',
       _id,
     };
   }

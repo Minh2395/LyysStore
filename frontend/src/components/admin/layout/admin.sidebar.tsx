@@ -62,20 +62,8 @@ const AdminSideBar = () => {
         // CATEGORIES (nested)
         {
           key: "categories",
-          label: "Categories",
+          label: <Link href="/dashboard/categories">Categories</Link>,
           icon: <TagsOutlined />,
-          children: [
-            {
-              key: "categories-list",
-              label: <Link href="/dashboard/categories">All Categories</Link>,
-            },
-            {
-              key: "categories-create",
-              label: (
-                <Link href="/dashboard/categories/create">Create Category</Link>
-              ),
-            },
-          ],
         },
 
         // PRODUCTS (nested)
