@@ -1,4 +1,4 @@
-import UserTable from "@/components/admin/dashboard/user.table";
+import UserTable from "@/components/admin/dashboard/users/user.table";
 
 const ManageUserPage = () => {
   return (

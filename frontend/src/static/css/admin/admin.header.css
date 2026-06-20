@@ -1,0 +1,85 @@
+/* ==========================================================================
+   ADMIN HEADER - UNIFIED LUXURY SYSTEM v2.5
+   ========================================================================== */
+
+.admin-header {
+  position: sticky;
+  top: 0;
+
+  height: 64px;
+  line-height: 64px;
+
+  padding: 0 20px !important;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  background: rgba(255, 255, 255, 0.9) !important;
+  backdrop-filter: blur(12px);
+
+  border-bottom: 1px solid #f0f0f0;
+
+  z-index: 999;
+}
+
+/* ==========================================================================
+   TOGGLE BUTTON
+   ========================================================================== */
+
+.admin-header__trigger {
+  width: 42px !important;
+  height: 42px !important;
+
+  border-radius: 10px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  transition: all 0.25s ease;
+}
+
+.admin-header__trigger:hover {
+  background: #f5f5f5 !important;
+}
+
+/* ==========================================================================
+   USER AREA
+   ========================================================================== */
+
+.admin-header__user {
+  color: #262626;
+  font-size: 14px;
+  font-weight: 500;
+
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.admin-header__user:hover {
+  color: #1677ff;
+}
+
+.admin-header__username {
+  max-width: 220px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   RESPONSIVE
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .admin-header {
+    padding: 0 12px !important;
+  }
+
+  .admin-header__username {
+    max-width: 120px;
+  }
+}

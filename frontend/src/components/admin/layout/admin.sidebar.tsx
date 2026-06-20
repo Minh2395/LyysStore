@@ -4,35 +4,46 @@ import Layout from "antd/es/layout";
 import Menu from "antd/es/menu";
 import {
   AppstoreOutlined,
-  MailOutlined,
-  SettingOutlined,
-  TeamOutlined,
+  UserOutlined,
+  TagsOutlined,
+  ShoppingCartOutlined,
+  ShopOutlined,
+  PictureOutlined,
+  BarChartOutlined,
+  BankOutlined,
 } from "@ant-design/icons";
 
-import React from "react";
 import { useAdminContext } from "@/library/admin.context";
 import type { MenuProps } from "antd";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import "../../../static/css/admin/admin.sidebar.css";
+
+const { Sider } = Layout;
 
 type MenuItem = Required<MenuProps>["items"][number];
 
 const AdminSideBar = () => {
-  const { Sider } = Layout;
   const { collapseMenu } = useAdminContext();
   const pathname = usePathname();
 
-  // map route → selected key
+  // ===== ACTIVE ROUTE HANDLER (scalable)
   const getSelectedKey = () => {
-    if (pathname.includes("/dashboard/user")) return ["users"];
-    if (pathname === "/dashboard") return ["dashboard"];
+    if (pathname.startsWith("/dashboard")) return ["dashboard"];
+    if (pathname.startsWith("/dashboard/users")) return ["users"];
+    if (pathname.startsWith("/dashboard/categories")) return ["categories"];
+    if (pathname.startsWith("/dashboard/products")) return ["products"];
+    if (pathname.startsWith("/dashboard/orders")) return ["orders"];
+    if (pathname.startsWith("/dashboard/branches")) return ["branches"];
+    if (pathname.startsWith("/dashboard/media")) return ["media"];
+    if (pathname.startsWith("/dashboard/analytics")) return ["analytics"];
     return [];
   };
 
   const items: MenuItem[] = [
     {
       key: "grp",
-      label: "Hỏi Dân IT",
+      label: "Admin Panel",
       type: "group",
       children: [
         {
@@ -40,60 +51,72 @@ const AdminSideBar = () => {
           label: <Link href="/dashboard">Dashboard</Link>,
           icon: <AppstoreOutlined />,
         },
+
+        // USERS
         {
           key: "users",
-          label: <Link href="/dashboard/user">Manage Users</Link>,
-          icon: <TeamOutlined />,
+          label: <Link href="/dashboard/users">Users</Link>,
+          icon: <UserOutlined />,
         },
+
+        // CATEGORIES (nested)
         {
-          key: "sub1",
-          label: "Navigation One",
-          icon: <MailOutlined />,
+          key: "categories",
+          label: <Link href="/dashboard/categories">Categories</Link>,
+          icon: <TagsOutlined />,
+        },
+
+        // PRODUCTS (nested)
+        {
+          key: "products",
+          label: <Link href="/dashboard/products">Products</Link>,
+          icon: <TagsOutlined />,
+        },
+
+        // ORDERS (theo user)
+        {
+          key: "orders",
+          label: "Orders",
+          icon: <ShopOutlined />,
           children: [
             {
-              key: "g1",
-              label: "Item 1",
-              type: "group",
-              children: [
-                { key: "1", label: "Option 1" },
-                { key: "2", label: "Option 2" },
-              ],
+              key: "orders-list",
+              label: <Link href="/dashboard/orders">All Orders</Link>,
+            },
+            {
+              key: "orders-by-user",
+              label: <Link href="/dashboard/orders/user">By User</Link>,
             },
           ],
         },
+
+        // BRANCHES / STORES
         {
-          key: "sub2",
-          label: "Navigation Two",
-          icon: <AppstoreOutlined />,
-          children: [
-            { key: "5", label: "Option 5" },
-            { key: "6", label: "Option 6" },
-          ],
+          key: "branches",
+          label: <Link href="/dashboard/branches">Branches</Link>,
+          icon: <BankOutlined />,
         },
+
+        // MEDIA / IMAGES
         {
-          type: "divider",
+          key: "media",
+          label: <Link href="/dashboard/media">Images & Media</Link>,
+          icon: <PictureOutlined />,
         },
+
+        // ANALYTICS
         {
-          key: "sub4",
-          label: "Navigation Three",
-          icon: <SettingOutlined />,
-          children: [
-            { key: "9", label: "Option 9" },
-            { key: "10", label: "Option 10" },
-          ],
+          key: "analytics",
+          label: <Link href="/dashboard/analytics">Statistics</Link>,
+          icon: <BarChartOutlined />,
         },
       ],
     },
   ];
 
   return (
-    <Sider collapsed={collapseMenu}>
-      <Menu
-        mode="inline"
-        selectedKeys={getSelectedKey()}
-        items={items}
-        style={{ height: "100vh" }}
-      />
+    <Sider className="admin-sidebar" collapsed={collapseMenu} width={260}>
+      <Menu mode="inline" selectedKeys={getSelectedKey()} items={items} />
     </Sider>
   );
 };

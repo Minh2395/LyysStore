@@ -10,6 +10,7 @@ import { Button, Layout, Dropdown, Space } from "antd";
 import { useContext } from "react";
 import { signOut, useSession } from "next-auth/react";
 import type { MenuProps } from "antd";
+import "../../../static/css/admin/admin.header.css";
 
 const AdminHeader = () => {
   const { Header } = Layout;
@@ -39,36 +40,20 @@ const AdminHeader = () => {
   ];
 
   return (
-    <Header
-      style={{
-        padding: 0,
-        display: "flex",
-        background: "#f5f5f5",
-        justifyContent: "space-between",
-        alignItems: "center",
-      }}
-    >
+    <Header className="admin-header">
       <Button
+        className="admin-header__trigger"
         type="text"
         icon={collapseMenu ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
         onClick={() => setCollapseMenu(!collapseMenu)}
-        style={{
-          fontSize: 16,
-          width: 64,
-          height: 64,
-        }}
       />
 
       <Dropdown menu={{ items, onClick: handleMenuClick }}>
-        <a
-          onClick={(e) => e.preventDefault()}
-          style={{
-            color: "inherit",
-            marginRight: 20,
-          }}
-        >
+        <a className="admin-header__user" onClick={(e) => e.preventDefault()}>
           <Space>
-            Welcome {session?.user?.username || "Admin"}
+            <span className="admin-header__username">
+              Welcome {session?.user?.username || "Admin"}
+            </span>
             <DownOutlined />
           </Space>
         </a>

@@ -1,8 +1,36 @@
+"use client";
+
 import AdminContent from "@/components/admin/layout/admin.content";
 import AdminFooter from "@/components/admin/layout/admin.footer";
 import AdminHeader from "@/components/admin/layout/admin.header";
 import AdminSideBar from "@/components/admin/layout/admin.sidebar";
-import { AdminContextProvider } from "@/library/admin.context";
+import { AdminContextProvider, useAdminContext } from "@/library/admin.context";
+
+import "@/static/css/admin/admin.layout.css";
+
+const AdminLayoutContent = ({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) => {
+  const { collapseMenu } = useAdminContext();
+
+  return (
+    <div className="admin-layout">
+      <div
+        className={`admin-layout__sidebar ${collapseMenu ? "collapsed" : ""}`}
+      >
+        <AdminSideBar />
+      </div>
+
+      <div className={`admin-layout__main ${collapseMenu ? "collapsed" : ""}`}>
+        <AdminHeader />
+        <AdminContent>{children}</AdminContent>
+        <AdminFooter />
+      </div>
+    </div>
+  );
+};
 
 const AdminLayout = ({
   children,
@@ -11,17 +39,7 @@ const AdminLayout = ({
 }>) => {
   return (
     <AdminContextProvider>
-      <div style={{ display: "flex" }}>
-        <div className="left-side" style={{ minWidth: 80 }}>
-          <AdminSideBar />
-        </div>
-
-        <div className="right-side" style={{ flex: 1 }}>
-          <AdminHeader />
-          <AdminContent>{children}</AdminContent>
-          <AdminFooter />
-        </div>
-      </div>
+      <AdminLayoutContent>{children}</AdminLayoutContent>
     </AdminContextProvider>
   );
 };
