@@ -8,7 +8,6 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 
 import { Category, CategoryDocument } from './schemas/category.schema';
-import { User } from '../users/schemas/user.schema';
 
 @Injectable()
 export class CategoriesService {

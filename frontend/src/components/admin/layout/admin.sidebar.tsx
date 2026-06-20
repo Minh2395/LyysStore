@@ -69,20 +69,8 @@ const AdminSideBar = () => {
         // PRODUCTS (nested)
         {
           key: "products",
-          label: "Products",
-          icon: <ShoppingCartOutlined />,
-          children: [
-            {
-              key: "products-list",
-              label: <Link href="/dashboard/products">All Products</Link>,
-            },
-            {
-              key: "products-create",
-              label: (
-                <Link href="/dashboard/products/create">Create Product</Link>
-              ),
-            },
-          ],
+          label: <Link href="/dashboard/products">Products</Link>,
+          icon: <TagsOutlined />,
         },
 
         // ORDERS (theo user)
