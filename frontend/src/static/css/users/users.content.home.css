@@ -83,9 +83,19 @@
 =================================== */
 
 .product-carousel {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  display: flex;
   gap: 25px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding-bottom: 10px;
+  cursor: grab;
+
+  /* ẩn scrollbar */
+  scrollbar-width: none;
+}
+
+.product-carousel::-webkit-scrollbar {
+  display: none;
 }
 
 .product-card {
@@ -96,6 +106,7 @@
   color: #111;
   border: 1px solid #efefef;
   transition: all 0.3s ease;
+  flex: 0 0 calc((100% - 100px) / 5);
 }
 
 .product-card:hover {

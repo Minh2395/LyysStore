@@ -81,15 +81,15 @@ const UsersHeader = () => {
             <div className="dropdown-column">
               <h4>Hình dáng</h4>
 
-              <Link href="/products/shape/round">Tròn</Link>
+              <Link href="/products/shape/tron">Tròn</Link>
 
-              <Link href="/products/shape/square">Vuông</Link>
+              <Link href="/products/shape/vuong">Vuông</Link>
 
-              <Link href="/products/shape/rectangle">Chữ nhật</Link>
+              <Link href="/products/shape/chu-nhat">Chữ nhật</Link>
 
               <Link href="/products/shape/oval">Oval</Link>
 
-              <Link href="/products/shape/cat-eye">Mắt mèo</Link>
+              <Link href="/products/shape/mat-meo">Mắt mèo</Link>
             </div>
 
             <div className="dropdown-column">
