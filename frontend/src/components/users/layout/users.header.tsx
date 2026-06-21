@@ -135,7 +135,7 @@ const UsersHeader = () => {
           </div>
         </div>
 
-        <Link href="/eye-exam">Đo mắt</Link>
+        <Link href="/eye-refraction">Đo mắt</Link>
 
         <Link href="/stores">Cửa hàng</Link>
 
@@ -229,7 +229,7 @@ const UsersHeader = () => {
         <Link href="/">Trang chủ</Link>
         <Link href="/products">Gọng kính</Link>
         <Link href="/lenses">Tròng kính</Link>
-        <Link href="/eye-exam">Đo mắt</Link>
+        <Link href="/eye-refraction">Đo mắt</Link>
         <Link href="/stores">Cửa hàng</Link>
         <Link href="/about">Về Lyys Store</Link>
         <Link href="/news">Tin tức</Link>
