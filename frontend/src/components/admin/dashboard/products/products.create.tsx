@@ -163,16 +163,27 @@ export default function ProductsCreate(props: IProps) {
           />
         </Form.Item>
 
-        <InputNumber<number>
-          value={basePrice}
-          min={0}
-          style={{ width: "100%" }}
-          formatter={(value) =>
-            `${value ?? ""}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
-          }
-          parser={(value) => Number(value?.replace(/\./g, "") || 0)}
-          onChange={(value) => setBasePrice(value || 0)}
-        />
+        <Form.Item
+          label="Base_price"
+          name="base_price"
+          rules={[
+            {
+              required: true,
+              message: "Please add base_price",
+            },
+          ]}
+        >
+          <InputNumber<number>
+            value={basePrice}
+            min={0}
+            style={{ width: "100%" }}
+            formatter={(value) =>
+              `${value ?? ""}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+            }
+            parser={(value) => Number(value?.replace(/\./g, "") || 0)}
+            onChange={(value) => setBasePrice(value || 0)}
+          />
+        </Form.Item>
 
         <Form.Item label="Status" name="status">
           <Select

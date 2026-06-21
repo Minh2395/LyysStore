@@ -5,17 +5,11 @@ export default async function Home() {
   const session = await auth();
   const role = session?.user?.role;
 
-  if (!session) {
-    redirect("/login");
-  }
-
+  // Admin → dashboard
   if (role === "ADMIN") {
     redirect("/dashboard");
   }
 
-  if (role === "USER") {
-    redirect("/home");
-  }
-
-  return null;
+  // User hoặc guest → shop home
+  redirect("/home");
 }

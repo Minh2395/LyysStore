@@ -62,11 +62,15 @@ const Login = () => {
 
       form.resetFields();
 
+      const callbackUrl = new URLSearchParams(window.location.search).get(
+        "callbackUrl",
+      );
+
       // ✅ ROUTE THEO ROLE
       if (role === "ADMIN") {
         router.push("/dashboard");
       } else {
-        router.push("/home");
+        router.push(callbackUrl || "/home");
       }
 
       router.refresh();
@@ -187,7 +191,7 @@ const Login = () => {
           </div>
 
           <div className="back-home">
-            <Link href="/">
+            <Link href="/home">
               <ArrowLeftOutlined />
               Quay lại trang chủ
             </Link>

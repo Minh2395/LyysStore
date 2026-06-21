@@ -38,6 +38,7 @@ export default function UsersContent() {
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/banners/banner1.png,${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/banners/banner2.png`.split(
       ",",
     );
+  const middleBanner = `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/banners/middle_banner.jpg`;
   const exploreStores = `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/stores/explore_stores.jpg`;
   const collections1 = `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/banners/collections/casual.png`;
   const collections2 = `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/banners/collections/street_style.png`;
@@ -87,6 +88,12 @@ export default function UsersContent() {
     }
   };
 
+  const getRandomProducts = (list: any[], count: number = 5) => {
+    return [...list].sort(() => Math.random() - 0.5).slice(0, count);
+  };
+
+  const displayProducts = getRandomProducts(products, 5);
+
   const nextFeedback = () => {
     setFeedbackIndex((prev) => (prev + 1) % feedbacks.length);
   };
@@ -117,7 +124,7 @@ export default function UsersContent() {
         </div>
 
         <div className="product-carousel">
-          {products.slice(0, 8).map((product) => (
+          {products.slice(0, 5).map((product) => (
             <Link
               key={product._id}
               href={`/products/${product._id}`}
@@ -142,7 +149,7 @@ export default function UsersContent() {
 
       {/* ================= BANNER GIỮA ================= */}
       <section className="middle-banner">
-        <img src="/images/banner/banner-middle.jpg" />
+        <img src={middleBanner} />
       </section>
 
       {/* ================= SẢN PHẨM MỚI ================= */}
@@ -152,7 +159,7 @@ export default function UsersContent() {
         </div>
 
         <div className="product-carousel">
-          {products.slice(0, 10).map((product) => (
+          {displayProducts.map((product) => (
             <Link
               key={product._id}
               href={`/products/${product._id}`}
@@ -168,7 +175,6 @@ export default function UsersContent() {
               />
 
               <h3>{product.name}</h3>
-
               <strong>{product.base_price.toLocaleString("vi-VN")}₫</strong>
             </Link>
           ))}

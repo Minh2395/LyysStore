@@ -37,6 +37,7 @@ import { RolesGuard } from './auth/passport/roles.guard';
 import { SettingsModule } from './modules/settings/settings.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { NewsModule } from './modules/news/news.module';
 
 @Module({
   imports: [
@@ -107,6 +108,7 @@ import { join } from 'path';
     PagesModule,
     NotificationsModule,
     ReportsModule,
+    NewsModule,
   ],
 
   controllers: [AppController],

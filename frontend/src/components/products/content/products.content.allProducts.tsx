@@ -4,39 +4,20 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import "../../../static/css/products/products.content.material.css";
 
-interface Props {
-  slug: string;
-}
-
-export default function UsersContentMaterial({ slug }: Props) {
+export default function UsersContentProducts() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [sort, setSort] = useState<"asc" | "desc">("asc");
-
   const [view, setView] = useState<"grid" | "list">("grid");
 
-  const bannerTitanium = `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/banners/materials/titanium.png`;
-  const bannerAcetate = `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/banners/materials/acetate.png`;
-  const bannerTr90 = `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/banners/materials/tr90.png`;
-  const bannerMental = `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/banners/materials/mental.png`;
-
-  const bannerMap: Record<string, string> = {
-    titanium: bannerTitanium,
-    acetate: bannerAcetate,
-    tr90: bannerTr90,
-    metal: bannerMental,
-  };
-
-  const currentBanner =
-    bannerMap[slug.toLowerCase()] ||
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/default-banner.png`;
+  const bannerAllProducts = `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/banners/all-products.png`;
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/products/shape/${slug}`,
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/products`,
         );
 
         const result = await res.json();
@@ -50,7 +31,7 @@ export default function UsersContentMaterial({ slug }: Props) {
     };
 
     fetchProducts();
-  }, [slug]);
+  }, []);
 
   if (loading) {
     return <p>Đang tải...</p>;
@@ -66,25 +47,12 @@ export default function UsersContentMaterial({ slug }: Props) {
     <div className="material-page">
       {/* Banner */}
       <section className="material-banner">
-        <img
-          src={
-            slug === "titanium"
-              ? bannerTitanium
-              : slug === "acetate"
-                ? bannerAcetate
-                : slug === "tr90"
-                  ? bannerTr90
-                  : slug === "metal"
-                    ? bannerMental
-                    : "/images/default-banner.jpg"
-          }
-          alt={slug}
-        />
+        <img src={bannerAllProducts} alt="Tất cả sản phẩm" />
       </section>
 
       {/* Toolbar */}
       <section className="material-toolbar">
-        <h2>Danh sách sản phẩm ({products.length})</h2>
+        <h2>Tất cả sản phẩm ({products.length})</h2>
 
         <div className="toolbar-actions">
           <button
@@ -136,7 +104,7 @@ export default function UsersContentMaterial({ slug }: Props) {
 
             <h3>{product.name}</h3>
 
-            <strong>{product.base_price.toLocaleString("vi-VN")}₫</strong>
+            <strong>{product.base_price?.toLocaleString("vi-VN")}₫</strong>
           </Link>
         ))}
       </section>

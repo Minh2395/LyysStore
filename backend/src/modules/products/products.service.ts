@@ -145,7 +145,10 @@ export class ProductsService {
   async findByCategorySlug(slug: string) {
     const products = await this.productModel
       .find()
-      .populate('category_id')
+      .populate({
+        path: 'category_id',
+        match: { slug },
+      })
       .lean();
 
     const uploads = await this.uploadModel.find({
@@ -153,20 +156,15 @@ export class ProductsService {
     });
 
     const uploadMap = new Map<string, string>();
-
-    uploads.forEach((upload) => {
-      const key = upload.entity_id.toString();
-
-      if (!uploadMap.has(key)) {
-        uploadMap.set(key, upload.url);
-      }
+    uploads.forEach((u) => {
+      uploadMap.set(u.entity_id.toString(), u.url);
     });
 
     return products
-      .filter((item: any) => item.category_id?.slug === slug)
-      .map((product) => ({
-        ...product,
-        image: uploadMap.get(product._id.toString()) || null,
+      .filter((p) => p.category_id)
+      .map((p) => ({
+        ...p,
+        image: uploadMap.get(p._id.toString()) || null,
       }));
   }
 }

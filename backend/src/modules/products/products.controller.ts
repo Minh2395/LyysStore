@@ -26,14 +26,20 @@ export class ProductsController {
 
   @Get('material/:slug')
   @Public()
-  findByCategorySlug(@Param('slug') slug: string) {
+  findByMaterial(@Param('slug') slug: string) {
     return this.productsService.findByCategorySlug(slug);
   }
 
-  @Get(':id')
+  @Get('shape/:slug')
   @Public()
-  findOne(@Param('id') id: string) {
-    return this.productsService.findOne(id);
+  findByShape(@Param('slug') slug: string) {
+    return this.productsService.findByCategorySlug(slug);
+  }
+
+  @Get('collections/:slug')
+  @Public()
+  findByCollections(@Param('slug') slug: string) {
+    return this.productsService.findByCategorySlug(slug);
   }
 
   @Post()
@@ -56,5 +62,11 @@ export class ProductsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.productsService.remove(id);
+  }
+
+  @Get(':id')
+  @Public()
+  findOne(@Param('id') id: string) {
+    return this.productsService.findOne(id);
   }
 }

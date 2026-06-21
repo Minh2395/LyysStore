@@ -10,6 +10,9 @@ import {
   StarFilled,
 } from "@ant-design/icons";
 
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+
 import "@/static/css/users/users.content.product_details.css";
 
 interface ProductDetailsProps {
@@ -29,6 +32,8 @@ export default function UsersProductDetails({ product }: ProductDetailsProps) {
   const [mainImage, setMainImage] = useState(images[0]);
   const [quantity, setQuantity] = useState(1);
   const [zoom, setZoom] = useState(false);
+  const { data: session, status } = useSession();
+  const router = useRouter();
 
   const [openSections, setOpenSections] = useState({
     info: true,
@@ -38,18 +43,20 @@ export default function UsersProductDetails({ product }: ProductDetailsProps) {
   });
 
   const handleAddToCart = async () => {
+    // 1. chưa login -> đá sang login
+    if (status !== "authenticated") {
+      router.push(
+        `/auth/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`,
+      );
+      return;
+    }
+
     try {
-      // 🔥 lấy session NextAuth đúng chuẩn
-      const resSession = await fetch("/api/auth/session");
-      const session = await resSession.json();
-
-      const token = session?.access_token || session?.user?.access_token;
-
-      console.log("SESSION DEBUG:", session);
+      const token =
+        session?.access_token || (session as any)?.user?.access_token;
 
       if (!token) {
-        console.error("No token found in session");
-        alert("Bạn cần đăng nhập");
+        router.push(`/auth/login`);
         return;
       }
 
@@ -72,12 +79,7 @@ export default function UsersProductDetails({ product }: ProductDetailsProps) {
 
       const data = await res.json();
 
-      if (!res.ok) {
-        console.log("CART ERROR:", data);
-        throw new Error(data?.message || "Add to cart failed");
-      }
-
-      console.log("Cart OK:", data);
+      if (!res.ok) throw new Error(data?.message || "Add to cart failed");
     } catch (err) {
       console.error(err);
     }
@@ -202,7 +204,11 @@ export default function UsersProductDetails({ product }: ProductDetailsProps) {
 
           <button className="add-cart" onClick={handleAddToCart}>
             <ShoppingCartOutlined />
-            <span>Thêm vào giỏ hàng</span>
+            <span>
+              {status !== "authenticated"
+                ? "Đăng nhập để mua hàng"
+                : "Thêm vào giỏ hàng"}
+            </span>
           </button>
         </div>
 
