@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import {
   ShoppingCartOutlined,
   MinusOutlined,
@@ -19,6 +20,83 @@ interface ProductDetailsProps {
   product: any;
 }
 
+type ProductCardItem = {
+  _id?: string;
+  id?: string;
+  slug?: string;
+  name?: string;
+  image?: string;
+  base_price?: number | string;
+};
+
+const getProductId = (item?: ProductCardItem | any) =>
+  item?._id || item?.id || item?.slug || "";
+
+const getProductIdentity = (item?: ProductCardItem | any) => {
+  const id = getProductId(item);
+  return id || item?.name || "";
+};
+
+const normalizeProducts = (value: unknown) =>
+  Array.isArray(value) ? value.filter(Boolean) : [];
+
+const getCategoryId = (item?: ProductCardItem | any) => {
+  const category = item?.category_id;
+
+  if (typeof category === "string") {
+    return category;
+  }
+
+  if (category && typeof category === "object") {
+    return category?._id || category?.id || "";
+  }
+
+  return item?.category?.id || item?.category?.slug || "";
+};
+
+const getProductHref = (item?: ProductCardItem | any) => {
+  const id = getProductId(item);
+  return id ? `/products/${id}` : "#";
+};
+
+const getProductImageSrc = (item?: ProductCardItem | any) =>
+  item?.image
+    ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${item.image}`
+    : "/images/no-image.jpg";
+
+function ProductCard({ item, href }: { item: ProductCardItem; href: string }) {
+  const imageSrc = getProductImageSrc(item);
+  const price = Number(item?.base_price ?? 0) || 0;
+
+  return (
+    <Link href={href} className="related-card">
+      <Image
+        src={imageSrc}
+        alt={item?.name || "Sản phẩm"}
+        width={180}
+        height={180}
+        unoptimized
+        sizes="(max-width: 768px) 100vw, 180px"
+      />
+
+      <div className="related-info">
+        <p
+          style={{
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
+            overflow: "hidden",
+          }}
+        >
+          {item?.name || "Sản phẩm"}
+        </p>
+
+        <span>{price.toLocaleString("vi-VN")} ₫</span>
+      </div>
+    </Link>
+  );
+}
+
 export default function UsersProductDetails({ product }: ProductDetailsProps) {
   const images =
     product?.images?.length > 0
@@ -32,6 +110,7 @@ export default function UsersProductDetails({ product }: ProductDetailsProps) {
   const [mainImage, setMainImage] = useState(images[0]);
   const [quantity, setQuantity] = useState(1);
   const [zoom, setZoom] = useState(false);
+  const [relatedProducts, setRelatedProducts] = useState<ProductCardItem[]>([]);
   const { data: session, status } = useSession();
   const router = useRouter();
 
@@ -41,6 +120,82 @@ export default function UsersProductDetails({ product }: ProductDetailsProps) {
     warranty: false,
     store: false,
   });
+
+  useEffect(() => {
+    let isActive = true;
+
+    const loadRelatedProducts = async () => {
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/products`,
+          { cache: "no-store" },
+        );
+
+        if (!res.ok) {
+          return;
+        }
+
+        const data = await res.json();
+        const products = Array.isArray(data?.data)
+          ? data.data
+          : Array.isArray(data)
+            ? data
+            : [];
+
+        if (!isActive) {
+          return;
+        }
+
+        const currentId = getProductIdentity(product);
+        const currentCategoryId = getCategoryId(product);
+
+        const filtered = (products as ProductCardItem[])
+          .filter((item) => {
+            const key = getProductIdentity(item);
+            const itemCategoryId = getCategoryId(item);
+
+            if (!key || key === currentId) {
+              return false;
+            }
+
+            if (
+              currentCategoryId &&
+              itemCategoryId &&
+              itemCategoryId !== currentCategoryId
+            ) {
+              return false;
+            }
+
+            return true;
+          })
+          .slice(0, 7);
+
+        setRelatedProducts(filtered);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    if (product?._id || product?.id || product?.slug) {
+      loadRelatedProducts();
+    }
+
+    return () => {
+      isActive = false;
+    };
+  }, [product?._id, product?.id, product?.slug, product?.category_id]);
+
+  const lensProducts = useMemo(() => {
+    const rawLenses = normalizeProducts(product?.lenses);
+    const currentId = getProductIdentity(product);
+
+    return (rawLenses as ProductCardItem[])
+      .filter((item) => {
+        const key = getProductIdentity(item);
+        return Boolean(key) && key !== currentId;
+      })
+      .slice(0, 4);
+  }, [product]);
 
   const handleAddToCart = async () => {
     // 1. chưa login -> đá sang login
@@ -278,7 +433,51 @@ export default function UsersProductDetails({ product }: ProductDetailsProps) {
 
             {openSections.store && (
               <div className="acc-content">
-                Có mặt tại TP.HCM, Hà Nội, Đà Nẵng và nhiều tỉnh thành khác.
+                <p>
+                  👓 <strong>Lyys Store</strong> nhận lắp các loại tròng kính:
+                  <br />
+                  Kính cận • Kính viễn • Kính loạn • Kính đa tròng • Tròng siêu
+                  mỏng • Kính mát • Kính đổi màu • Tròng chống ánh sáng xanh...
+                </p>
+
+                <p>
+                  💕 Có <strong>ưu đãi đặc biệt</strong> khi mua gọng kính tại
+                  shop.
+                </p>
+
+                <p>
+                  🎯 Hỗ trợ <strong>đo mắt miễn phí</strong> và{" "}
+                  <strong>cắt tròng lấy ngay</strong> tại các chi nhánh.
+                  <br />
+                  <em>
+                    * Riêng Mini Store tại The New Playground Quận 1 chỉ bán
+                    gọng kính.
+                  </em>
+                </p>
+
+                <div className="store-list">
+                  <h4>📍 Hệ thống cửa hàng</h4>
+
+                  <ul>
+                    <li>203 Nguyễn Thiện Thuật, P. Bàn Cờ (Quận 3)</li>
+                    <li>78 Võ Oanh, P. Thạnh Mỹ Tây (Bình Thạnh)</li>
+                    <li>317 Nguyễn Thái Bình, P. Bảy Hiền (Tân Bình)</li>
+                    <li>101 Thống Nhất, P. Thủ Đức</li>
+                    <li>
+                      The New Playground, 26 Lý Tự Trọng, P. Sài Gòn (Quận 1)
+                      <br />
+                      <small>⏰ 10:00 - 21:30 (Chỉ bán gọng kính)</small>
+                    </li>
+                  </ul>
+                </div>
+
+                <p>
+                  🕰 <strong>Giờ mở cửa:</strong> 09:30 - 21:30
+                </p>
+
+                <p>
+                  ☎️ <strong>Hotline:</strong> 0898 703 088 - 0898 702 088
+                </p>
               </div>
             )}
           </div>
@@ -300,65 +499,37 @@ export default function UsersProductDetails({ product }: ProductDetailsProps) {
       </div>
 
       {/* ================= LENS ================= */}
-      <div className="lens-section">
-        <h2>Tròng kính bổ trợ</h2>
+      {lensProducts.length > 0 && (
+        <div className="lens-section">
+          <h2>Tròng kính bổ trợ</h2>
 
-        <div className="related-list">
-          {(product?.lenses || product?.related || [])
-            .slice(0, 4)
-            .map((item: any, idx: number) => (
-              <div key={idx} className="related-card">
-                <Image
-                  src={
-                    item?.image
-                      ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${item.image}`
-                      : "/images/no-image.jpg"
-                  }
-                  alt={item?.name}
-                  width={180}
-                  height={180}
-                  unoptimized
-                />
-
-                <div className="related-info">
-                  <p>{item?.name}</p>
-
-                  <span>
-                    {(item?.base_price ?? 0).toLocaleString("vi-VN")} ₫
-                  </span>
-                </div>
-              </div>
-            ))}
-        </div>
-      </div>
-      {/* ================= RELATED ================= */}
-      <div className="related-section">
-        <h2>Sản phẩm tương tự</h2>
-
-        <div className="related-list">
-          {(product?.related || []).map((item: any, idx: number) => (
-            <div key={idx} className="related-card">
-              <Image
-                src={
-                  item?.image
-                    ? `${process.env.NEXT_PUBLIC_BACKEND_URL}${item.image}`
-                    : "/images/no-image.jpg"
-                }
-                alt={item?.name}
-                width={180}
-                height={180}
-                unoptimized
+          <div className="related-list">
+            {lensProducts.map((item, idx) => (
+              <ProductCard
+                key={getProductId(item) || `lens-${idx}`}
+                item={item}
+                href={getProductHref(item)}
               />
-
-              <div className="related-info">
-                <p>{item?.name}</p>
-
-                <span>{(item?.base_price ?? 0).toLocaleString("vi-VN")} ₫</span>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
+      {/* ================= RELATED ================= */}
+      {relatedProducts.length > 0 && (
+        <div className="related-section">
+          <h2>Sản phẩm tương tự</h2>
+
+          <div className="related-list">
+            {relatedProducts.map((item, idx) => (
+              <ProductCard
+                key={getProductId(item) || `related-${idx}`}
+                item={item}
+                href={getProductHref(item)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
       {/* ================= ZOOM ================= */}
       {zoom && (
         <div className="zoom-modal" onClick={() => setZoom(false)}>

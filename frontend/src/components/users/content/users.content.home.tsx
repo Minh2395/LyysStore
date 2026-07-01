@@ -212,7 +212,9 @@ export default function UsersContent() {
         <div className="store-content">
           <h2>GHÉ THĂM HỆ THỐNG</h2>
           <p>Trải nghiệm tại cửa hàng Lyys Store</p>
-          <button>Xem hệ thống</button>
+          <Link href="/stores">
+            <button>Xem hệ thống</button>
+          </Link>
         </div>
       </section>
 

@@ -1,18 +1,20 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
-import { useEffect } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
 import { useSession } from "next-auth/react";
 import "../../../static/css/users/users.content.cart.css";
 
-interface CartItem {
-  product_id: {
-    _id: string;
-    name: string;
-    base_price: number;
-    slug: string;
-  };
+interface CartProduct {
+  _id?: string;
+  name?: string;
+  base_price?: number;
+  slug?: string;
+  image?: string;
+}
 
+interface CartItem {
+  product_id: CartProduct | null;
   quantity: number;
   price: number;
 }
@@ -24,111 +26,281 @@ interface CartContextType {
   addToCart: (item: CartItem) => Promise<void>;
   setCart: (items: CartItem[]) => void;
   clearCart: () => void;
+  updateQuantity: (productId: string, quantity: number) => Promise<void>;
+  removeItem: (productId: string) => Promise<void>;
+  removeMany: (productIds: string[]) => Promise<void>;
+  selectedIds: string[];
+  toggleSelectItem: (productId: string) => void;
+  toggleSelectAll: () => void;
+  isAllSelected: boolean;
+  selectedTotalQuantity: number;
+  selectedSubtotal: number;
 }
 
 const CartContext = createContext<CartContextType | null>(null);
 
-export const CartProvider = ({ children }: { children: React.ReactNode }) => {
-  const { data: session } = useSession();
+const normalizeCartPayload = (payload: any) => {
+  const cart = payload?.data ?? payload;
+
+  return {
+    items: Array.isArray(cart?.items) ? cart.items : [],
+    total_quantity: Number(cart?.total_quantity ?? 0),
+    total_price: Number(cart?.total_price ?? 0),
+  };
+};
+
+const getImageUrl = (image?: string) => {
+  if (!image) return "/images/no-image.jpg";
+
+  if (/^https?:\/\//i.test(image)) return image;
+
+  return `${process.env.NEXT_PUBLIC_BACKEND_URL}${image}`;
+};
+
+export const CartProvider = ({ children }: { children: ReactNode }) => {
+  const { data: session, status } = useSession();
+  const [items, setItems] = useState<CartItem[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  const authToken =
+    session?.access_token ||
+    (session as any)?.user?.access_token ||
+    (typeof window !== "undefined"
+      ? localStorage.getItem("access_token") || localStorage.getItem("token")
+      : "");
+
+  const total_quantity = items.reduce((sum, item) => sum + item.quantity, 0);
+  const total_price = items.reduce(
+    (sum, item) => sum + item.quantity * Number(item.price ?? 0),
+    0,
+  );
+
+  const selectedItems = useMemo(
+    () =>
+      items.filter((item) => {
+        const productId = item.product_id?._id ?? "";
+        return selectedIds.includes(productId);
+      }),
+    [items, selectedIds],
+  );
+
+  const selectedTotalQuantity = selectedItems.reduce(
+    (sum, item) => sum + item.quantity,
+    0,
+  );
+
+  const selectedSubtotal = selectedItems.reduce(
+    (sum, item) => sum + item.quantity * Number(item.price ?? 0),
+    0,
+  );
+
+  const isAllSelected =
+    items.length > 0 &&
+    items.every((item) => {
+      const productId = item.product_id?._id ?? "";
+      return !!productId && selectedIds.includes(productId);
+    });
 
   useEffect(() => {
+    if (status !== "authenticated") {
+      setItems([]);
+      setSelectedIds([]);
+      return;
+    }
+
     const fetchCart = async () => {
-      const token = session?.access_token;
+      if (!authToken) return;
 
-      if (!token) return;
-
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/carts`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
+      try {
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/carts`,
+          {
+            headers: {
+              Authorization: `Bearer ${authToken}`,
+            },
           },
-        },
-      );
+        );
 
-      const data = await res.json();
+        const payload = await res.json().catch(() => null);
 
-      if (res.ok) {
-        setItems(data?.data?.items || data?.items || []);
+        if (res.ok) {
+          const nextCart = normalizeCartPayload(payload);
+          setItems(nextCart.items);
+        }
+      } catch (error) {
+        console.error("FETCH CART ERROR:", error);
       }
     };
 
     fetchCart();
-  }, [session]);
+  }, [authToken, status]);
 
-  const [items, setItems] = useState<CartItem[]>([]);
+  useEffect(() => {
+    setSelectedIds((prev) =>
+      prev.filter((id) =>
+        items.some((item: CartItem) => (item.product_id?._id ?? "") === id),
+      ),
+    );
+  }, [items]);
 
-  const total_quantity = items.reduce((s, i) => s + i.quantity, 0);
-  const total_price = items.reduce((s, i) => s + i.quantity * i.price, 0);
+  const syncCartFromResponse = (payload: any) => {
+    const nextCart = normalizeCartPayload(payload);
+    setItems(nextCart.items);
+    setSelectedIds((prev) =>
+      prev.filter((id) =>
+        nextCart.items.some(
+          (item: CartItem) => (item.product_id?._id ?? "") === id,
+        ),
+      ),
+    );
+  };
 
-  // =========================
-  // ADD TO CART (SYNC VERSION)
-  // =========================
   const addToCart = async (item: CartItem) => {
+    if (!authToken) return;
+
     try {
-      const token =
-        localStorage.getItem("access_token") || localStorage.getItem("token");
-
-      if (!token) {
-        console.error("❌ No token found");
-        return;
-      }
-
-      const cleanToken = token.replace("Bearer ", "");
-
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/carts/add`,
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${cleanToken}`,
+            Authorization: `Bearer ${authToken}`,
           },
-          body: JSON.stringify(item),
+          body: JSON.stringify({
+            product_id: item.product_id?._id,
+            quantity: item.quantity,
+          }),
         },
       );
 
-      const data = await res.json().catch(() => null);
+      const payload = await res.json().catch(() => null);
 
       if (!res.ok) {
-        console.error("CART API ERROR:", data);
+        console.error("ADD TO CART ERROR:", payload);
         return;
       }
 
-      // =========================
-      // SYNC STATE FROM BACKEND
-      // =========================
-      if (data?.data?.items) {
-        setItems(data.data.items);
-      } else {
-        // fallback local update
-        setItems((prev) => {
-          const existing = prev.find(
-            (i) => i.product_id._id === item.product_id._id,
-          );
+      syncCartFromResponse(payload);
+    } catch (error) {
+      console.error("ADD TO CART ERROR:", error);
+    }
+  };
 
-          if (existing) {
-            return prev.map((i) =>
-              i.product_id._id === item.product_id._id
-                ? { ...i, quantity: i.quantity + item.quantity }
-                : i,
-            );
-          }
+  const updateQuantity = async (productId: string, quantity: number) => {
+    if (!authToken || !productId || quantity < 1) return;
 
-          return [...prev, item];
-        });
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/carts/items/${productId}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${authToken}`,
+          },
+          body: JSON.stringify({ quantity }),
+        },
+      );
+
+      const payload = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        console.error("UPDATE CART ERROR:", payload);
+        return;
       }
-    } catch (err) {
-      console.error("ADD TO CART ERROR:", err);
+
+      syncCartFromResponse(payload);
+    } catch (error) {
+      console.error("UPDATE CART ERROR:", error);
+    }
+  };
+
+  const removeItem = async (productId: string) => {
+    if (!authToken || !productId) return;
+
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/carts/items/${productId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${authToken}`,
+          },
+        },
+      );
+
+      const payload = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        console.error("REMOVE CART ITEM ERROR:", payload);
+        return;
+      }
+
+      syncCartFromResponse(payload);
+    } catch (error) {
+      console.error("REMOVE CART ITEM ERROR:", error);
+    }
+  };
+
+  const removeMany = async (productIds: string[]) => {
+    if (!authToken || productIds.length === 0) return;
+
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/carts/items`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${authToken}`,
+          },
+          body: JSON.stringify({ productIds }),
+        },
+      );
+
+      const payload = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        console.error("REMOVE CART ITEMS ERROR:", payload);
+        return;
+      }
+
+      syncCartFromResponse(payload);
+    } catch (error) {
+      console.error("REMOVE CART ITEMS ERROR:", error);
     }
   };
 
   const setCart = (newItems: CartItem[]) => {
     setItems(newItems);
+    setSelectedIds([]);
   };
 
   const clearCart = () => {
     setItems([]);
+    setSelectedIds([]);
+  };
+
+  const toggleSelectItem = (productId: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(productId)
+        ? prev.filter((id) => id !== productId)
+        : [...prev, productId],
+    );
+  };
+
+  const toggleSelectAll = () => {
+    if (isAllSelected) {
+      setSelectedIds([]);
+      return;
+    }
+
+    const nextIds = items
+      .map((item) => item.product_id?._id)
+      .filter((id): id is string => Boolean(id));
+
+    setSelectedIds(nextIds);
   };
 
   return (
@@ -140,6 +312,15 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         addToCart,
         setCart,
         clearCart,
+        updateQuantity,
+        removeItem,
+        removeMany,
+        selectedIds,
+        toggleSelectItem,
+        toggleSelectAll,
+        isAllSelected,
+        selectedTotalQuantity,
+        selectedSubtotal,
       }}
     >
       {children}
@@ -147,9 +328,6 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-// =========================
-// SAFE HOOK (NO CRASH)
-// =========================
 export const useCart = () => {
   const ctx = useContext(CartContext);
 
@@ -161,6 +339,15 @@ export const useCart = () => {
       addToCart: async () => {},
       setCart: () => {},
       clearCart: () => {},
+      updateQuantity: async () => {},
+      removeItem: async () => {},
+      removeMany: async () => {},
+      selectedIds: [],
+      toggleSelectItem: () => {},
+      toggleSelectAll: () => {},
+      isAllSelected: false,
+      selectedTotalQuantity: 0,
+      selectedSubtotal: 0,
     };
   }
 
@@ -168,7 +355,36 @@ export const useCart = () => {
 };
 
 export default function CartPage() {
-  const { items, total_price, total_quantity } = useCart();
+  const {
+    items,
+    total_price,
+    total_quantity,
+    updateQuantity,
+    removeItem,
+    removeMany,
+    selectedIds,
+    toggleSelectItem,
+    toggleSelectAll,
+    isAllSelected,
+    selectedTotalQuantity,
+    selectedSubtotal,
+  } = useCart();
+
+  const handleIncrease = (item: CartItem) => {
+    const productId = item.product_id?._id;
+
+    if (!productId) return;
+
+    updateQuantity(productId, item.quantity + 1);
+  };
+
+  const handleDecrease = (item: CartItem) => {
+    const productId = item.product_id?._id;
+
+    if (!productId || item.quantity <= 1) return;
+
+    updateQuantity(productId, item.quantity - 1);
+  };
 
   return (
     <div className="cart-page">
@@ -180,10 +396,13 @@ export default function CartPage() {
         </div>
       ) : (
         <div className="cart-container">
-          {/* LEFT */}
           <div className="cart-left">
             <div className="cart-header">
-              <input type="checkbox" />
+              <input
+                type="checkbox"
+                checked={isAllSelected}
+                onChange={toggleSelectAll}
+              />
 
               <span>Sản phẩm</span>
 
@@ -196,52 +415,78 @@ export default function CartPage() {
               <span>Thành tiền</span>
             </div>
 
-            {items.map((item, index) => (
-              <div key={index} className="cart-item">
-                <div className="cart-product">
-                  <input type="checkbox" />
+            {items.map((item, index) => {
+              const productId = item.product_id?._id ?? "";
+              const isSelected = !!productId && selectedIds.includes(productId);
+              const unitPrice = Number(item.price ?? 0);
 
-                  <img
-                    src="/images/no-image.png"
-                    alt={item.product_id.name}
-                    className="cart-image"
-                  />
+              return (
+                <div key={productId || index} className="cart-item">
+                  <div className="cart-product">
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => toggleSelectItem(productId)}
+                    />
 
-                  <div className="cart-info">
-                    <h4>{item.product_id.name}</h4>
+                    <img
+                      src={getImageUrl(item.product_id?.image)}
+                      alt={item.product_id?.name || "Product image"}
+                      className="cart-image"
+                    />
 
-                    <p>Mã SP: {item.product_id._id}</p>
+                    <div className="cart-info">
+                      <h4>{item.product_id?.name || "Sản phẩm"}</h4>
+
+                      <p>Mã SP: {productId}</p>
+                    </div>
+                  </div>
+
+                  <div className="cart-price">
+                    {unitPrice.toLocaleString("vi-VN")}đ
+                  </div>
+
+                  <div className="cart-quantity">
+                    <button
+                      type="button"
+                      onClick={() => handleDecrease(item)}
+                      disabled={item.quantity <= 1}
+                    >
+                      -
+                    </button>
+
+                    <span>{item.quantity}</span>
+
+                    <button type="button" onClick={() => handleIncrease(item)}>
+                      +
+                    </button>
+                  </div>
+
+                  <div className="cart-stock">Còn hàng</div>
+
+                  <div className="cart-total">
+                    {(unitPrice * item.quantity).toLocaleString("vi-VN")}đ
                   </div>
                 </div>
-
-                <div className="cart-price">
-                  {item.price.toLocaleString("vi-VN")}đ
-                </div>
-
-                <div className="cart-quantity">
-                  <button>-</button>
-
-                  <span>{item.quantity}</span>
-
-                  <button>+</button>
-                </div>
-
-                <div className="cart-stock">Còn hàng</div>
-
-                <div className="cart-total">
-                  {(item.price * item.quantity).toLocaleString("vi-VN")}đ
-                </div>
-              </div>
-            ))}
+              );
+            })}
 
             <div className="cart-actions">
-              <button className="delete-selected">Xóa sản phẩm đã chọn</button>
+              <button
+                type="button"
+                className="delete-selected"
+                onClick={() => removeMany(selectedIds)}
+                disabled={selectedIds.length === 0}
+              >
+                Xóa sản phẩm đã chọn
+              </button>
 
-              <button className="continue-shopping">Tiếp tục mua hàng</button>
+              <button type="button" className="continue-shopping">
+                Tiếp tục mua hàng
+              </button>
             </div>
           </div>
 
-          {/* RIGHT */}
           <div className="cart-right">
             <div className="order-summary">
               <h2>Tóm tắt đơn hàng</h2>
@@ -250,22 +495,24 @@ export default function CartPage() {
 
               <div className="summary-row">
                 <span>Tổng số lượng</span>
-                <span>{total_quantity}</span>
+                <span>{selectedTotalQuantity}</span>
               </div>
 
               <div className="summary-row">
                 <span>Tạm tính</span>
 
-                <span>{total_price.toLocaleString("vi-VN")}đ</span>
+                <span>{selectedSubtotal.toLocaleString("vi-VN")}đ</span>
               </div>
 
               <div className="summary-row total">
                 <span>Tổng cộng</span>
 
-                <span>{total_price.toLocaleString("vi-VN")}đ</span>
+                <span>{selectedSubtotal.toLocaleString("vi-VN")}đ</span>
               </div>
 
-              <button className="checkout-btn">Thanh toán</button>
+              <button type="button" className="checkout-btn">
+                Thanh toán
+              </button>
 
               <div className="payment-methods">
                 <h4>Chấp nhận thanh toán</h4>
