@@ -25,11 +25,12 @@ interface IBackendRes<T> {
   message?: string;
 }
 
-const Verify = () => {
-  const router = useRouter();
-  const params = useParams<{ id: string }>();
+interface VerifyProps {
+  id: string;
+}
 
-  const id = params?.id;
+const Verify = ({ id }: VerifyProps) => {
+  const router = useRouter();
 
   const onFinish = async (values: { code: string }) => {
     try {
