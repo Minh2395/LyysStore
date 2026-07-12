@@ -97,19 +97,25 @@ const UsersFooter = () => {
 
           <ul>
             <li>
-              <Link href="/policy/payment">Chính sách thanh toán</Link>
+              <Link href="/policies/payment">Chính sách thanh toán</Link>
             </li>
 
             <li>
-              <Link href="/policy/warranty">Chính sách bảo hành</Link>
+              <Link href="/policies/warranty">
+                Chính sách bảo hành, đổi trả
+              </Link>
             </li>
 
             <li>
-              <Link href="/policy/shipping">Chính sách vận chuyển</Link>
+              <Link href="/policies/shipping">Chính sách vận chuyển</Link>
             </li>
 
             <li>
-              <Link href="/policy/security">Chính sách bảo mật</Link>
+              <Link href="/policies/security">Chính sách bảo mật</Link>
+            </li>
+
+            <li>
+              <Link href="/policies/customer">Chính sách khách hàng</Link>
             </li>
           </ul>
         </div>

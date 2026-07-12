@@ -1,0 +1,336 @@
+/* =========================
+   CUSTOMER POLICY
+========================= */
+
+.policies-customer {
+  padding: 64px 16px;
+  background: #f8f8f8;
+}
+
+.policies-customer .policies-content__container {
+  width: min(100%, 1100px);
+  margin: 0 auto;
+}
+
+.policies-customer .policies-content__heading {
+  max-width: 780px;
+  margin: 0 auto 40px;
+  text-align: center;
+}
+
+.policies-customer .policies-content__eyebrow {
+  display: inline-block;
+  margin-bottom: 10px;
+  color: #b78a45;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+}
+
+.policies-customer .policies-content__heading h1.ant-typography {
+  margin: 0 0 14px;
+  color: #1d1d1d;
+  font-size: clamp(26px, 4vw, 38px);
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.policies-customer .policies-content__heading .ant-typography {
+  margin-bottom: 0;
+  color: #6d6d6d;
+  font-size: 16px;
+  line-height: 1.75;
+}
+
+.policies-customer__list {
+  width: 100%;
+}
+
+.policies-customer__card.ant-card {
+  overflow: hidden;
+  border: 1px solid #ececec;
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 5%);
+}
+
+.policies-customer__card .ant-card-head {
+  min-height: 60px;
+  padding: 0 24px;
+  border-bottom: 1px solid #eeeeee;
+  background: #ffffff;
+}
+
+.policies-customer__card .ant-card-head-title {
+  padding: 17px 0;
+  color: #222222;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.policies-customer__card .ant-card-head-title .anticon {
+  color: #b78a45;
+  font-size: 21px;
+}
+
+.policies-customer__card .ant-card-body {
+  padding: 24px;
+}
+
+.policies-customer__card .ant-typography {
+  color: #555555;
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+.policies-customer__card .ant-typography:last-child {
+  margin-bottom: 0;
+}
+
+.policies-customer__steps {
+  border-top: 1px solid #eeeeee;
+}
+
+.policies-customer__steps .ant-list-item {
+  padding: 16px 4px;
+  border-bottom: 1px solid #eeeeee;
+}
+
+.policies-customer__steps .ant-space {
+  width: 100%;
+}
+
+.policies-customer__steps .ant-typography {
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.policies-customer__step-icon {
+  flex-shrink: 0;
+  margin-top: 4px;
+  color: #b78a45;
+  font-size: 18px;
+}
+
+.policies-customer__notice.ant-alert {
+  margin-top: 22px;
+  border-radius: 10px;
+}
+
+.policies-customer__notice.ant-alert-info {
+  border: 1px solid #b8d9f5;
+  background: #f2f9ff;
+}
+
+.policies-customer__notice.ant-alert-warning {
+  border: 1px solid #f2d59d;
+  background: #fffaf0;
+}
+
+.policies-customer__notice .ant-alert-message {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.policies-customer__notice.ant-alert-info .ant-alert-message {
+  color: #176b9d;
+}
+
+.policies-customer__notice.ant-alert-warning .ant-alert-message {
+  color: #8a5a12;
+}
+
+.policies-customer__notice .ant-alert-description {
+  margin-top: 7px;
+  color: #5f5f5f;
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.policies-customer__responsibility {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.policies-customer__responsibility-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid #ececec;
+  border-radius: 12px;
+  background: #fafafa;
+}
+
+.policies-customer__responsibility-item > .anticon {
+  flex-shrink: 0;
+  margin-top: 3px;
+  color: #b78a45;
+  font-size: 24px;
+}
+
+.policies-customer__responsibility-item > div {
+  min-width: 0;
+  flex: 1;
+}
+
+.policies-customer__responsibility-item h4.ant-typography {
+  margin: 0 0 10px;
+  color: #252525;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.policies-customer__compact-list .ant-list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 0;
+  border: 0;
+}
+
+.policies-customer__compact-list .ant-list-item > .anticon {
+  flex-shrink: 0;
+  margin-top: 4px;
+  color: #b78a45;
+  font-size: 15px;
+}
+
+.policies-customer__compact-list .ant-typography {
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.policies-customer__divider.ant-divider {
+  margin: 42px 0 28px;
+  border-color: #e7e7e7;
+}
+
+.policies-customer .policies-content__benefits {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.policies-customer .policies-content__benefit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  min-height: 58px;
+  padding: 12px 14px;
+  border: 1px solid #ececec;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #333333;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+  box-shadow: 0 4px 14px rgb(0 0 0 / 3%);
+}
+
+.policies-customer .policies-content__benefit .anticon {
+  flex-shrink: 0;
+  color: #b78a45;
+  font-size: 17px;
+}
+
+.policies-customer__secure {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin-top: 26px;
+  color: #777777;
+  font-size: 14px;
+  text-align: center;
+}
+
+.policies-customer__secure .anticon {
+  flex-shrink: 0;
+  color: #b78a45;
+  font-size: 19px;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 991px) {
+  .policies-customer {
+    padding: 48px 16px;
+  }
+
+  .policies-customer .policies-content__benefits {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .policies-customer__responsibility {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 575px) {
+  .policies-customer {
+    padding: 36px 12px;
+  }
+
+  .policies-customer .policies-content__heading {
+    margin-bottom: 28px;
+  }
+
+  .policies-customer .policies-content__heading .ant-typography {
+    font-size: 14px;
+  }
+
+  .policies-customer__card .ant-card-head {
+    padding: 0 16px;
+  }
+
+  .policies-customer__card .ant-card-head-title {
+    font-size: 15px;
+  }
+
+  .policies-customer__card .ant-card-body {
+    padding: 18px 16px;
+  }
+
+  .policies-customer__card .ant-typography,
+  .policies-customer__steps .ant-typography {
+    font-size: 14px;
+  }
+
+  .policies-customer__notice .ant-alert-description {
+    font-size: 13px;
+  }
+
+  .policies-customer__responsibility-item {
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .policies-customer__responsibility-item > .anticon {
+    font-size: 21px;
+  }
+
+  .policies-customer__responsibility-item h4.ant-typography {
+    font-size: 15px;
+  }
+
+  .policies-customer .policies-content__benefits {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .policies-customer .policies-content__benefit {
+    justify-content: flex-start;
+    min-height: 52px;
+    padding: 10px 14px;
+    text-align: left;
+  }
+
+  .policies-customer__secure {
+    align-items: flex-start;
+    font-size: 13px;
+  }
+}
