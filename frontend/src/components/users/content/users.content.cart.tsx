@@ -1,6 +1,8 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { Button } from "antd";
 import type { ReactNode } from "react";
 import { useSession } from "next-auth/react";
 import "../../../static/css/users/users.content.cart.css";
@@ -510,9 +512,11 @@ export default function CartPage() {
                 <span>{selectedSubtotal.toLocaleString("vi-VN")}đ</span>
               </div>
 
-              <button type="button" className="checkout-btn">
-                Thanh toán
-              </button>
+              <Link href="/orders" className="checkout-link">
+                <Button type="primary" className="checkout-btn">
+                  Thanh toán
+                </Button>
+              </Link>
 
               <div className="payment-methods">
                 <h4>Chấp nhận thanh toán</h4>

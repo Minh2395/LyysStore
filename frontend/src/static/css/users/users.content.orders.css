@@ -1,0 +1,406 @@
+/* ===========================
+   ORDERS PAGE
+=========================== */
+
+#orders-page {
+  width: 100%;
+  background: #f7f7f7;
+  padding: 48px 20px;
+}
+
+#orders-page * {
+  box-sizing: border-box;
+}
+
+.orders-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* ===========================
+   LAYOUT
+=========================== */
+
+.orders-layout {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+}
+
+.orders-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.orders-sidebar {
+  width: 420px;
+  flex-shrink: 0;
+}
+
+/* ===========================
+   LEFT
+=========================== */
+
+.orders-left {
+  background: #fff;
+  border-radius: 18px;
+  padding: 32px;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.05);
+}
+
+.orders-form {
+  width: 100%;
+}
+
+.shipping-section,
+.payment-section {
+  width: 100%;
+}
+
+.payment-section {
+  margin-top: 40px;
+}
+
+.section-title {
+  margin-bottom: 22px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1px;
+}
+
+/* ===========================
+   FORM
+=========================== */
+
+.form-row {
+  display: flex;
+  gap: 18px;
+}
+
+.form-col {
+  flex: 1;
+}
+
+.orders-form .ant-form-item {
+  margin-bottom: 18px;
+}
+
+.orders-form .ant-input,
+.orders-form .ant-input-affix-wrapper,
+.orders-form .ant-select-selector,
+.orders-form textarea {
+  border-radius: 10px !important;
+  min-height: 48px;
+}
+
+.orders-form textarea {
+  padding-top: 12px;
+  min-height: 120px;
+}
+
+.orders-form .ant-select-selector {
+  display: flex;
+  align-items: center;
+}
+
+.orders-form .ant-input:focus,
+.orders-form .ant-input-affix-wrapper:focus-within,
+.orders-form .ant-select-focused .ant-select-selector {
+  box-shadow: none;
+}
+
+/* ===========================
+   PAYMENT
+=========================== */
+
+.payment-group {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.payment-group .ant-card {
+  border-radius: 12px;
+  border: 1px solid #e6e6e6;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+.payment-group .ant-card:hover {
+  border-color: #000;
+}
+
+.payment-group .ant-card-body {
+  padding: 18px 22px;
+}
+
+.payment-group .ant-radio-wrapper {
+  width: 100%;
+  font-weight: 500;
+}
+
+.payment-section .ant-btn {
+  margin-top: 30px;
+  height: 54px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* ===========================
+   SIDEBAR
+=========================== */
+
+#orders-summary {
+  position: sticky;
+  top: 90px;
+}
+
+#orders-summary .ant-card {
+  border-radius: 18px;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.05);
+}
+
+#orders-summary .ant-card-body {
+  padding: 28px;
+}
+
+.coupon-box {
+  margin: 24px 0;
+}
+
+.coupon-row {
+  display: flex;
+  gap: 12px;
+}
+
+.coupon-input {
+  flex: 1;
+}
+
+.coupon-input .ant-input {
+  height: 46px;
+}
+
+.coupon-row .ant-btn {
+  height: 46px;
+  white-space: nowrap;
+}
+
+.summary-content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.summary-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.summary-total h2 {
+  margin: 0 !important;
+}
+
+/* ===========================
+   BUTTONS
+=========================== */
+
+.ant-btn-primary {
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+/* ===========================
+   1400px
+=========================== */
+
+@media (max-width: 1400px) {
+  .orders-container {
+    max-width: 1200px;
+  }
+
+  .orders-sidebar {
+    width: 380px;
+  }
+}
+
+/* ===========================
+   1200px
+=========================== */
+
+@media (max-width: 1200px) {
+  .orders-layout {
+    gap: 24px;
+  }
+
+  .orders-sidebar {
+    width: 340px;
+  }
+
+  .orders-left {
+    padding: 28px;
+  }
+}
+
+/* ===========================
+   1024px
+=========================== */
+
+@media (max-width: 1024px) {
+  .orders-layout {
+    flex-direction: column;
+  }
+
+  .orders-main,
+  .orders-sidebar {
+    width: 100%;
+  }
+
+  .orders-sidebar {
+    order: -1;
+  }
+
+  #orders-summary {
+    position: relative;
+    top: 0;
+  }
+}
+
+/* ===========================
+   768px
+=========================== */
+
+@media (max-width: 768px) {
+  #orders-page {
+    padding: 28px 14px;
+  }
+
+  .orders-left {
+    padding: 22px;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .coupon-row {
+    flex-direction: column;
+  }
+
+  .coupon-row .ant-btn {
+    width: 100%;
+  }
+
+  .section-title {
+    font-size: 24px !important;
+  }
+
+  .summary-total {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+}
+
+/* ===========================
+   576px
+=========================== */
+
+@media (max-width: 576px) {
+  .orders-left {
+    border-radius: 14px;
+    padding: 18px;
+  }
+
+  #orders-summary .ant-card-body {
+    padding: 20px;
+  }
+
+  .orders-form .ant-input,
+  .orders-form .ant-select-selector,
+  .orders-form textarea {
+    min-height: 44px;
+  }
+
+  .payment-group .ant-card-body {
+    padding: 14px 16px;
+  }
+
+  .payment-section .ant-btn {
+    height: 50px;
+  }
+
+  .section-title {
+    font-size: 20px !important;
+  }
+
+  .summary-total h2 {
+    font-size: 22px !important;
+  }
+}
+
+/* ===========================
+   430px
+=========================== */
+
+@media (max-width: 430px) {
+  #orders-page {
+    padding: 18px 10px;
+  }
+
+  .orders-left {
+    padding: 14px;
+  }
+
+  #orders-summary .ant-card-body {
+    padding: 16px;
+  }
+
+  .section-title {
+    font-size: 18px !important;
+  }
+
+  .summary-row {
+    font-size: 14px;
+  }
+
+  .payment-group .ant-radio-wrapper {
+    font-size: 14px;
+  }
+
+  .payment-section .ant-btn {
+    font-size: 14px;
+  }
+}
+
+/* ===========================
+   360px
+=========================== */
+
+@media (max-width: 360px) {
+  .section-title {
+    font-size: 16px !important;
+  }
+
+  .summary-total {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .summary-total h2 {
+    font-size: 18px !important;
+  }
+
+  .coupon-row .ant-btn {
+    font-size: 13px;
+  }
+}
