@@ -222,15 +222,21 @@ export class UsersService {
       verification_expires: new Date(Date.now() + 10 * 60 * 1000),
     });
 
-    this.mailerService.sendMail({
-      to: user.email,
-      subject: 'Activate your account at @lyysstore',
-      template: 'register',
-      context: {
-        name: user?.name ?? user.email,
-        activationCode: code,
-      },
-    });
+    try {
+      await this.mailerService.sendMail({
+        to: user.email,
+        subject: 'Activate your account',
+        template: 'register',
+        context: {
+          name: user.name,
+          activationCode: code,
+        },
+      });
+
+      console.log('Mail sent');
+    } catch (err) {
+      console.error(err);
+    }
 
     return { _id: user._id };
   }
