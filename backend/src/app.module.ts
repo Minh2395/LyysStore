@@ -59,17 +59,15 @@ import { NewsModule } from './modules/news/news.module';
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
         transport: {
-          host: 'smtp-relay.brevo.com',
-          port: 587,
-          secure: false,
+          host: 'smtp.gmail.com',
+          port: 465,
+          secure: true,
           auth: {
             user: configService.get('MAIL_USER'),
             pass: configService.get('MAIL_PASSWORD'),
           },
         },
-        defaults: {
-          from: `"Lyys Store" <${configService.get('MAIL_USER')}>`,
-        },
+        defaults: { from: '"No Reply" <noreply@example.com>' },
         template: {
           dir: process.cwd() + '/src/mail/templates',
           adapter: new HandlebarsAdapter(),
