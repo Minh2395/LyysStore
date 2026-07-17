@@ -62,6 +62,7 @@ import { NewsModule } from './modules/news/news.module';
           host: 'smtp.gmail.com',
           port: 465,
           secure: true,
+          family: 4,
           auth: {
             user: configService.get('MAIL_USER'),
             pass: configService.get('MAIL_PASSWORD'),
