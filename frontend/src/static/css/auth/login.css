@@ -16,18 +16,22 @@
   flex: 1;
   position: relative;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .login-banner-image {
   width: 100%;
-  height: 100vh;
+  height: 100%;
+  min-height: 100vh;
   object-fit: cover;
-  transform: scale(1.02);
+  object-position: center;
   transition: transform 8s ease;
 }
 
 .login-page:hover .login-banner-image {
-  transform: scale(1.08);
+  transform: scale(1.05);
 }
 
 .login-banner::after {
@@ -189,45 +193,70 @@
   gap: 14px;
 }
 
-.social-login button {
-  height: 52px !important;
+.social-login .ant-btn {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+
+  width: 100%;
+  height: 54px !important;
+
   border-radius: 12px !important;
-  font-weight: 600;
   font-size: 15px;
+  font-weight: 600;
+
+  transition: all 0.25s ease;
 }
+
+/* Icon */
+
+.social-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 22px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.social-text {
+  display: flex;
+  align-items: center;
+}
+
+/* Google */
 
 .google-btn {
   background: #fff !important;
-  border: 1px solid #e2e8f0 !important;
-
-  height: 54px !important;
-
-  transition: all 0.3s ease;
+  color: #3c4043 !important;
+  border: 1px solid #dadce0 !important;
 }
 
 .google-btn:hover {
+  background: #f8f9fa !important;
+  border-color: #dadce0 !important;
   transform: translateY(-2px);
-  border-color: #2563eb !important;
 }
 
+/* Facebook */
+
 .facebook-btn {
-  height: 54px !important;
-
-  background: linear-gradient(135deg, #1877f2, #0f5ed7) !important;
-
+  background: #1877f2 !important;
+  color: #fff !important;
   border: none !important;
-
-  transition: all 0.3s ease;
 }
 
 .facebook-btn:hover {
+  background: #166fe5 !important;
   transform: translateY(-2px);
 }
 
-.google-btn .anticon,
-.facebook-btn .anticon {
-  margin-right: 10px;
-  font-size: 18px;
+/* Icon Facebook trắng */
+
+.facebook-btn .social-icon {
+  color: #fff;
 }
 
 /* =========================
