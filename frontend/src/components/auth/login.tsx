@@ -7,7 +7,8 @@ import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import "../../static/css/auth/login.css";
-import { GoogleOutlined, FacebookFilled } from "@ant-design/icons";
+import { FcGoogle } from "react-icons/fc";
+import { FaFacebookF } from "react-icons/fa";
 
 import ModalReactive from "./modal.reactive";
 import ModalChangePassword from "./modal.change.password";
@@ -21,6 +22,8 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
 
   const [form] = Form.useForm();
+
+  const loginBanner = `${process.env.NEXT_PUBLIC_BACKEND_URL}/uploads/banners/login-banner.png`;
 
   const onFinish = async (values: any) => {
     const { email, password } = values;
@@ -90,7 +93,7 @@ const Login = () => {
         {/* Banner bên trái */}
         <div className="login-banner">
           <img
-            src="/images/login-banner.jpg"
+            src={loginBanner}
             alt="Login Banner"
             className="login-banner-image"
           />
@@ -169,8 +172,11 @@ const Login = () => {
               className="google-btn"
               onClick={() => signIn("google")}
             >
-              <GoogleOutlined />
-              Đăng nhập bằng Google
+              <span className="social-icon">
+                <FcGoogle />
+              </span>
+
+              <span className="social-text">Đăng nhập bằng Google</span>
             </Button>
 
             <Button
@@ -179,8 +185,11 @@ const Login = () => {
               className="facebook-btn"
               onClick={() => signIn("facebook")}
             >
-              <FacebookFilled />
-              Đăng nhập bằng Facebook
+              <span className="social-icon">
+                <FaFacebookF />
+              </span>
+
+              <span className="social-text">Đăng nhập bằng Facebook</span>
             </Button>
           </div>
 
