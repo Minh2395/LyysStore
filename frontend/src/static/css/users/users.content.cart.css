@@ -351,14 +351,14 @@
   border: none !important;
   border-radius: 12px !important;
 
-  background: linear-gradient(135deg, #16a34a, #15803d) !important;
+  background: linear-gradient(135deg, #c89b3c, #b8860b) !important;
   color: #fff !important;
 
   font-size: 16px;
   font-weight: 700;
   letter-spacing: 0.4px;
 
-  box-shadow: 0 10px 24px rgba(22, 163, 74, 0.2);
+  box-shadow: 0 10px 24px rgba(200, 155, 60, 0.2);
 
   transition:
     all 0.25s ease,
@@ -367,13 +367,13 @@
 
 .checkout-btn:hover,
 .checkout-btn:focus {
-  background: linear-gradient(135deg, #15803d, #166534) !important;
+  background: linear-gradient(135deg, #c89b3c, #b8860b) !important;
   color: #fff !important;
   border: none !important;
 
   transform: translateY(-2px);
 
-  box-shadow: 0 14px 30px rgba(22, 163, 74, 0.28);
+  box-shadow: 0 10px 24px rgba(200, 155, 60, 0.2);
 }
 
 .checkout-btn:active {

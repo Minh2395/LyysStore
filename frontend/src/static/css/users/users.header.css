@@ -35,7 +35,7 @@
 
 .logo-image {
   width: 180px;
-  height: 180px;
+  height: 80px;
   object-fit: contain;
 }
 
@@ -468,8 +468,8 @@
   }
 
   .logo-image {
-    width: 200px;
-    height: 200px;
+    width: 180px;
+    height: 80px;
   }
 
   .search-form {
@@ -483,8 +483,8 @@
   }
 
   .logo-image {
-    width: 200px;
-    height: 200px;
+    width: 180px;
+    height: 80px;
   }
 
   .search-form {
