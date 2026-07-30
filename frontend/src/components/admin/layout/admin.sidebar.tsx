@@ -100,7 +100,7 @@ const AdminSideBar = () => {
         // MEDIA / IMAGES
         {
           key: "media",
-          label: <Link href="/dashboard/media">Images & Media</Link>,
+          label: <Link href="/dashboard/uploads">Images & Media</Link>,
           icon: <PictureOutlined />,
         },
 
