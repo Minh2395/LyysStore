@@ -1,49 +1,45 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Store, StoreDocument } from './schemas/store.schema';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Store } from '../../database/entities';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
 
 @Injectable()
 export class StoresService {
   constructor(
-    @InjectModel(Store.name)
-    private readonly storeModel: Model<StoreDocument>,
+    @InjectRepository(Store)
+    private readonly storeRepository: Repository<Store>,
   ) {}
 
   // CREATE STORE
   async create(createStoreDto: CreateStoreDto) {
-    const store = new this.storeModel(createStoreDto);
-    return await store.save();
+    const store = this.storeRepository.create(createStoreDto);
+    return this.storeRepository.save(store);
   }
 
   // GET ALL STORES (active only)
   async findAll() {
-    return await this.storeModel
-      .find({ is_active: true })
-      .sort({ createdAt: -1 })
-      .exec();
+    return this.storeRepository.find({
+      where: { is_active: true },
+      order: { createdAt: 'DESC' },
+    });
   }
 
   // GET ONE STORE
   async findOne(id: string) {
-    return await this.storeModel.findById(id).exec();
+    return this.storeRepository.findOneBy({ _id: id });
   }
 
   // UPDATE STORE
   async update(id: string, updateStoreDto: UpdateStoreDto) {
-    return await this.storeModel.findByIdAndUpdate(id, updateStoreDto, {
-      new: true,
-    });
+    await this.storeRepository.update({ _id: id }, updateStoreDto);
+    return this.findOne(id);
   }
 
   // SOFT DELETE STORE
   async remove(id: string) {
-    return await this.storeModel.findByIdAndUpdate(
-      id,
-      { is_active: false },
-      { new: true },
-    );
+    await this.storeRepository.update({ _id: id }, { is_active: false });
+    return this.findOne(id);
   }
 }

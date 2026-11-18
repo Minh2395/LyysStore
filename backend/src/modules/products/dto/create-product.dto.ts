@@ -1,10 +1,10 @@
 import {
   IsEnum,
-  IsMongoId,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
+  Matches,
   Min,
 } from 'class-validator';
 
@@ -19,7 +19,7 @@ export class CreateProductDto {
   @IsNotEmpty()
   slug: string;
 
-  @IsMongoId()
+  @Matches(/^[a-f\d]{24}$/i)
   category_id: string;
 
   @IsNumber()

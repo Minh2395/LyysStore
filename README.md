@@ -4,13 +4,13 @@
 
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)
 ![NestJS](https://img.shields.io/badge/NestJS-11-E0234E?logo=nestjs)
-![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb)
+![MySQL](https://img.shields.io/badge/MySQL-8.4-4479A1?logo=mysql)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript)
 ![Ant Design](https://img.shields.io/badge/Ant%20Design-5-0170FE?logo=ant-design)
 ![NextAuth](https://img.shields.io/badge/Auth-NextAuth.js-000000)
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
-**A modern full-stack e-commerce platform built with Next.js, NestJS, MongoDB, and TypeScript.**
+**A modern full-stack e-commerce platform built with Next.js, NestJS, MySQL, and TypeScript.**
 
 </div>
 
@@ -48,7 +48,7 @@ The project consists of two independent applications:
 
 - **Frontend** built with Next.js 16 (App Router)
 - **Backend** built with NestJS 11
-- **MongoDB Atlas** as the database
+- **MySQL** as the database, accessed through TypeORM
 - **NextAuth.js** for authentication
 - **Ant Design** for the administration dashboard
 
@@ -146,8 +146,8 @@ Advanced upload manager including:
 
 - NestJS
 - TypeScript
-- Mongoose
-- MongoDB Atlas
+- TypeORM
+- MySQL
 - JWT
 - Passport
 - Multer
@@ -159,9 +159,9 @@ Advanced upload manager including:
 
 ## Database
 
-MongoDB Atlas
+MySQL
 
-Collections include:
+Tables include:
 
 - Users
 - Roles
@@ -187,10 +187,10 @@ Collections include:
                        ▼
                NestJS Backend
                        │
-                Mongoose ODM
+                  TypeORM
                        │
                        ▼
-                MongoDB Atlas
+                   MySQL
 ```
 
 ---
@@ -290,47 +290,32 @@ npm install
 
 ## Backend
 
-Create:
+Copy the example file, then replace the placeholders with your local MySQL,
+JWT, mail, and API credentials:
 
+```bash
+cd backend
+cp .env.example .env
 ```
-backend/.env
-```
 
-```env
-PORT=8080
-
-MONGODB_URI=
-
-JWT_SECRET=
-
-NEXTAUTH_SECRET=
-
-GOOGLE_CLIENT_ID=
-GOOGLE_CLIENT_SECRET=
-
-FACEBOOK_CLIENT_ID=
-FACEBOOK_CLIENT_SECRET=
-
-FRONTEND_URL=http://localhost:3000
-```
+For local MySQL, set `MYSQL_HOST`, `MYSQL_PORT`, `MYSQL_USER`,
+`MYSQL_PASSWORD`, and `MYSQL_DATABASE` to match your MySQL Server/Workbench
+setup. Do not commit `.env` or use real credentials in `.env.example`.
 
 ---
 
 ## Frontend
 
-Create
+Copy the example file and add your own OAuth credentials if you use Google or
+Facebook sign-in:
 
+```bash
+cd frontend
+cp .env.example .env.local
 ```
-frontend/.env.local
-```
 
-```env
-NEXT_PUBLIC_BACKEND_URL=http://localhost:8080
-
-NEXTAUTH_URL=http://localhost:3000
-
-NEXTAUTH_SECRET=
-```
+The frontend example uses `http://localhost:8080` for the local backend.
+`.env.local` is ignored by Git; keep OAuth secrets private.
 
 ---
 
@@ -339,8 +324,13 @@ NEXTAUTH_SECRET=
 ## Backend
 
 ```bash
+docker compose -f docker-compose.yml up -d
 npm run start:dev
 ```
+
+Run the command from the `backend` directory after adding MySQL values to `backend/.env`.
+`MYSQL_SYNCHRONIZE=true` creates and updates tables automatically for local development; use
+database migrations or an explicitly managed schema in production.
 
 Runs on
 
@@ -401,7 +391,7 @@ Backend
 
 Database
 
-- MongoDB Atlas
+- MySQL
 
 ---
 
@@ -432,7 +422,7 @@ NestJS Guard
 
 ↓
 
-MongoDB
+MySQL
 ```
 
 ---
@@ -613,7 +603,7 @@ Admin
 - Image Optimization
 - Lazy Loading
 - Pagination
-- MongoDB Indexing
+- MySQL Indexing
 
 ---
 
@@ -669,6 +659,10 @@ git push origin feature/my-feature
 
 Made with ❤️ using
 
-Next.js • NestJS • MongoDB • TypeScript
+Next.js • NestJS • MySQL • TypeScript
 
 </div>
+
+## License
+
+This project is licensed under the [MIT License](LICENSE.md).
