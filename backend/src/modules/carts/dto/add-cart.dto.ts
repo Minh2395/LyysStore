@@ -1,7 +1,7 @@
-import { IsMongoId, IsNumber, Min } from 'class-validator';
+import { IsNumber, Matches, Min } from 'class-validator';
 
 export class AddCartDto {
-  @IsMongoId()
+  @Matches(/^[a-f\d]{24}$/i)
   product_id: string;
 
   @IsNumber()

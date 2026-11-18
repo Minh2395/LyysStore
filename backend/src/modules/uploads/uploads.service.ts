@@ -1,18 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-
-import { Model } from 'mongoose';
-
-import { Upload, UploadDocument } from './schemas/upload.schema';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Upload } from '../../database/entities';
 
 @Injectable()
 export class UploadsService {
   constructor(
-    @InjectModel(Upload.name)
-    private uploadModel: Model<UploadDocument>,
+    @InjectRepository(Upload)
+    private uploadRepository: Repository<Upload>,
   ) {}
 
   async findAll() {
-    return this.uploadModel.find();
+    return this.uploadRepository.find();
   }
 }

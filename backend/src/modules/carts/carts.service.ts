@@ -1,9 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { InjectRepository } from '@nestjs/typeorm';
+import { In, Repository } from 'typeorm';
 
-import { Cart, CartDocument, CartStatus } from './schemas/cart.schema';
-import { Product, ProductDocument } from '../products/schemas/product.schema';
+import { Cart, CartItem, CartStatus, Product } from '../../database/entities';
 import { AddCartDto } from './dto/add-cart.dto';
 import { UpdateCartItemDto } from './dto/update-cart.dto';
 import { RemoveCartItemsDto } from './dto/remove-cart.dto';
@@ -11,27 +10,28 @@ import { RemoveCartItemsDto } from './dto/remove-cart.dto';
 @Injectable()
 export class CartsService {
   constructor(
-    @InjectModel(Cart.name)
-    private cartModel: Model<CartDocument>,
-
-    @InjectModel(Product.name)
-    private productModel: Model<ProductDocument>,
+    @InjectRepository(Cart)
+    private cartRepository: Repository<Cart>,
+    @InjectRepository(Product)
+    private productRepository: Repository<Product>,
   ) {}
 
   async addToCart(userId: string, dto: AddCartDto) {
-    const product = await this.productModel.findById(dto.product_id);
+    const product = await this.productRepository.findOneBy({
+      _id: dto.product_id,
+    });
 
     if (!product) {
       throw new NotFoundException('Product not found');
     }
 
-    let cart = await this.cartModel.findOne({
+    let cart = await this.cartRepository.findOneBy({
       user_id: userId,
       status: CartStatus.ACTIVE,
     });
 
     if (!cart) {
-      cart = await this.cartModel.create({
+      cart = this.cartRepository.create({
         user_id: userId,
         items: [],
         total_price: 0,
@@ -41,7 +41,7 @@ export class CartsService {
     }
 
     const existingItem = cart.items.find(
-      (item: any) => item.product_id.toString() === dto.product_id,
+      (item) => item.product_id === dto.product_id,
     );
 
     if (existingItem) {
@@ -51,39 +51,31 @@ export class CartsService {
         product_id: product._id,
         quantity: dto.quantity,
         price: product.base_price,
-      } as any);
+      });
     }
 
     cart.total_quantity = cart.items.reduce(
-      (sum: number, item: any) => sum + item.quantity,
+      (sum, item) => sum + item.quantity,
       0,
     );
 
     cart.total_price = cart.items.reduce(
-      (sum: number, item: any) => sum + item.quantity * item.price,
+      (sum, item) => sum + item.quantity * item.price,
       0,
     );
 
-    await cart.save();
+    cart = await this.cartRepository.save(cart);
 
-    return this.cartModel.findById(cart._id).populate({
-      path: 'items.product_id',
-      select: 'name base_price slug image',
-    });
+    return this.populateProducts(cart);
   }
 
   async getCart(userId: string) {
-    const cart = await this.cartModel
-      .findOne({
-        user_id: userId,
-        status: CartStatus.ACTIVE,
-      })
-      .populate({
-        path: 'items.product_id',
-        select: 'name base_price slug image',
-      });
+    const cart = await this.cartRepository.findOneBy({
+      user_id: userId,
+      status: CartStatus.ACTIVE,
+    });
 
-    return cart;
+    return cart ? this.populateProducts(cart) : null;
   }
 
   async updateQuantity(
@@ -91,7 +83,7 @@ export class CartsService {
     productId: string,
     dto: UpdateCartItemDto,
   ) {
-    const cart = await this.cartModel.findOne({
+    const cart = await this.cartRepository.findOneBy({
       user_id: userId,
       status: CartStatus.ACTIVE,
     });
@@ -100,9 +92,7 @@ export class CartsService {
       throw new NotFoundException('Cart not found');
     }
 
-    const item = cart.items.find(
-      (i: any) => i.product_id.toString() === productId,
-    );
+    const item = cart.items.find((i) => i.product_id === productId);
 
     if (!item) {
       throw new NotFoundException('Item not found');
@@ -110,26 +100,20 @@ export class CartsService {
 
     item.quantity = dto.quantity;
 
-    cart.total_quantity = cart.items.reduce(
-      (sum: number, i: any) => sum + i.quantity,
-      0,
-    );
+    cart.total_quantity = cart.items.reduce((sum, i) => sum + i.quantity, 0);
 
     cart.total_price = cart.items.reduce(
-      (sum: number, i: any) => sum + i.quantity * i.price,
+      (sum, i) => sum + i.quantity * i.price,
       0,
     );
 
-    await cart.save();
+    await this.cartRepository.save(cart);
 
-    return this.cartModel.findById(cart._id).populate({
-      path: 'items.product_id',
-      select: 'name base_price slug image',
-    });
+    return this.populateProducts(cart);
   }
 
   async removeItem(userId: string, productId: string) {
-    const cart = await this.cartModel.findOne({
+    const cart = await this.cartRepository.findOneBy({
       user_id: userId,
       status: CartStatus.ACTIVE,
     });
@@ -138,30 +122,22 @@ export class CartsService {
       throw new NotFoundException('Cart not found');
     }
 
-    cart.items = cart.items.filter(
-      (i: any) => i.product_id.toString() !== productId,
-    ) as any;
+    cart.items = cart.items.filter((i) => i.product_id !== productId);
 
-    cart.total_quantity = cart.items.reduce(
-      (sum: number, i: any) => sum + i.quantity,
-      0,
-    );
+    cart.total_quantity = cart.items.reduce((sum, i) => sum + i.quantity, 0);
 
     cart.total_price = cart.items.reduce(
-      (sum: number, i: any) => sum + i.quantity * i.price,
+      (sum, i) => sum + i.quantity * i.price,
       0,
     );
 
-    await cart.save();
+    await this.cartRepository.save(cart);
 
-    return this.cartModel.findById(cart._id).populate({
-      path: 'items.product_id',
-      select: 'name base_price slug image',
-    });
+    return this.populateProducts(cart);
   }
 
   async removeMany(userId: string, dto: RemoveCartItemsDto) {
-    const cart = await this.cartModel.findOne({
+    const cart = await this.cartRepository.findOneBy({
       user_id: userId,
       status: CartStatus.ACTIVE,
     });
@@ -171,24 +147,44 @@ export class CartsService {
     }
 
     cart.items = cart.items.filter(
-      (i: any) => !dto.productIds.includes(i.product_id.toString()),
-    ) as any;
-
-    cart.total_quantity = cart.items.reduce(
-      (sum: number, i: any) => sum + i.quantity,
-      0,
+      (i) => !dto.productIds.includes(i.product_id),
     );
+
+    cart.total_quantity = cart.items.reduce((sum, i) => sum + i.quantity, 0);
 
     cart.total_price = cart.items.reduce(
-      (sum: number, i: any) => sum + i.quantity * i.price,
+      (sum, i) => sum + i.quantity * i.price,
       0,
     );
 
-    await cart.save();
+    await this.cartRepository.save(cart);
 
-    return this.cartModel.findById(cart._id).populate({
-      path: 'items.product_id',
-      select: 'name base_price slug image',
-    });
+    return this.populateProducts(cart);
+  }
+
+  private async populateProducts(cart: Cart) {
+    const productIds = [...new Set(cart.items.map((item) => item.product_id))];
+    const products = productIds.length
+      ? await this.productRepository.findBy({ _id: In(productIds) })
+      : [];
+    const productMap = new Map(
+      products.map((product) => [
+        product._id,
+        {
+          _id: product._id,
+          name: product.name,
+          base_price: product.base_price,
+          slug: product.slug,
+        },
+      ]),
+    );
+
+    return {
+      ...cart,
+      items: cart.items.map((item: CartItem) => ({
+        ...item,
+        product_id: productMap.get(item.product_id) ?? null,
+      })),
+    };
   }
 }

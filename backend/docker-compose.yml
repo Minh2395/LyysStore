@@ -1,15 +1,17 @@
 services:
-  mongo:
-    image: mongo:7
-    container_name: lyys-mongo
+  mysql:
+    image: mysql:8.4
+    container_name: lyys-mysql
     restart: always
     ports:
-      - "27017:27017"
+      - "3306:3306"
     environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: 123456
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in backend/.env}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-lyys_store}
+      MYSQL_USER: ${MYSQL_USER:-lyys_store}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in backend/.env}
     volumes:
-      - mongo_data:/data/db
+      - mysql_data:/var/lib/mysql
 
 volumes:
-  mongo_data:
+  mysql_data:

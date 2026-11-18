@@ -3,7 +3,7 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
-  IsMongoId,
+  Matches,
   MinLength,
 } from 'class-validator';
 
@@ -34,7 +34,7 @@ export class CreateAuthDto {
 // ======================
 export class CodeAuthDto {
   @IsNotEmpty({ message: '_id không được để trống' })
-  @IsMongoId({ message: '_id không hợp lệ' })
+  @Matches(/^[a-f\d]{24}$/i, { message: '_id không hợp lệ' })
   _id: string;
 
   @IsNotEmpty({ message: 'code không được để trống' })

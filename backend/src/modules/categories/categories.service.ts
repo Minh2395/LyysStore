@@ -1,58 +1,62 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-
-import { InjectModel } from '@nestjs/mongoose';
-
-import { Model } from 'mongoose';
+import { InjectRepository } from '@nestjs/typeorm';
+import { In, Repository } from 'typeorm';
 
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-
-import { Category, CategoryDocument } from './schemas/category.schema';
+import { Category } from '../../database/entities';
 
 @Injectable()
 export class CategoriesService {
   constructor(
-    @InjectModel(Category.name)
-    private categoryModel: Model<CategoryDocument>,
+    @InjectRepository(Category)
+    private categoryRepository: Repository<Category>,
   ) {}
 
-  async create(createCategoryDto: CreateCategoryDto, user: any) {
-    return await this.categoryModel.create({
+  async create(createCategoryDto: CreateCategoryDto, user: { _id: string }) {
+    const category = this.categoryRepository.create({
       ...createCategoryDto,
+      name: createCategoryDto.name.trim(),
+      slug: createCategoryDto.slug.trim(),
       created_by: user._id,
     });
+    return this.categoryRepository.save(category);
   }
 
   async findAll() {
-    return await this.categoryModel
-      .find()
-      .populate('parent_id', 'name')
-      .sort({ sort_order: 1 });
+    const categories = await this.categoryRepository.find({
+      order: { sort_order: 'ASC' },
+    });
+    return this.populateParentNames(categories);
   }
 
   async findOne(id: string) {
-    const category = await this.categoryModel
-      .findById(id)
-      .populate('parent_id', 'name');
+    const category = await this.categoryRepository.findOneBy({ _id: id });
 
     if (!category) {
       throw new NotFoundException('Category not found');
     }
 
-    return category;
+    return (await this.populateParentNames([category]))[0];
   }
 
   // ======================
   // UPDATE CATEGORY
   // ======================
   async update(id: string, updateCategoryDto: UpdateCategoryDto) {
-    const category = await this.categoryModel.findByIdAndUpdate(
-      id,
-      updateCategoryDto,
+    await this.categoryRepository.update(
+      { _id: id },
       {
-        new: true,
+        ...updateCategoryDto,
+        ...(updateCategoryDto.name && {
+          name: updateCategoryDto.name.trim(),
+        }),
+        ...(updateCategoryDto.slug && {
+          slug: updateCategoryDto.slug.trim(),
+        }),
       },
     );
+    const category = await this.categoryRepository.findOneBy({ _id: id });
 
     if (!category) {
       throw new NotFoundException('Category not found');
@@ -68,11 +72,13 @@ export class CategoriesService {
   // HARD DELETE
   // ======================
   async remove(id: string) {
-    const category = await this.categoryModel.findByIdAndDelete(id);
+    const category = await this.categoryRepository.findOneBy({ _id: id });
 
     if (!category) {
       throw new NotFoundException('Category not found');
     }
+
+    await this.categoryRepository.remove(category);
 
     return {
       success: true,
@@ -81,5 +87,29 @@ export class CategoriesService {
         _id: id,
       },
     };
+  }
+
+  private async populateParentNames(categories: Category[]) {
+    const parentIds = [
+      ...new Set(
+        categories
+          .map((category) => category.parent_id)
+          .filter((id): id is string => Boolean(id)),
+      ),
+    ];
+    const parents = parentIds.length
+      ? await this.categoryRepository.findBy({ _id: In(parentIds) })
+      : [];
+    const parentMap = new Map(
+      parents.map((parent) => [
+        parent._id,
+        { _id: parent._id, name: parent.name },
+      ]),
+    );
+
+    return categories.map((category) => ({
+      ...category,
+      parent_id: parentMap.get(category.parent_id) ?? category.parent_id,
+    }));
   }
 }

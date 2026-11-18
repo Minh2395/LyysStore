@@ -1,20 +1,13 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { UploadsService } from './uploads.service';
 import { UploadsController } from './uploads.controller';
 
-import { Upload, UploadSchema } from './schemas/upload.schema';
+import { Upload } from '../../database/entities';
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([
-      {
-        name: Upload.name,
-        schema: UploadSchema,
-      },
-    ]),
-  ],
+  imports: [TypeOrmModule.forFeature([Upload])],
   controllers: [UploadsController],
   providers: [UploadsService],
   exports: [UploadsService],

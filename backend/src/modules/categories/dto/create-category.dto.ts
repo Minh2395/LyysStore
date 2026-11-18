@@ -1,9 +1,9 @@
 import {
   IsBoolean,
-  IsMongoId,
   IsNumber,
   IsOptional,
   IsString,
+  Matches,
 } from 'class-validator';
 
 export class CreateCategoryDto {
@@ -17,7 +17,7 @@ export class CreateCategoryDto {
   slug: string;
 
   @IsOptional()
-  @IsMongoId()
+  @Matches(/^[a-f\d]{24}$/i)
   parent_id?: string;
 
   @IsOptional()

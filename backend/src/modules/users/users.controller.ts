@@ -15,7 +15,7 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import mongoose from 'mongoose';
+import { isValidEntityId } from '../../database/entity-id';
 
 @Controller('users')
 export class UsersController {
@@ -34,7 +34,7 @@ export class UsersController {
   // ======================
   @Get()
   findAll(
-    @Query() query: any,
+    @Query() query: Record<string, string | string[]>,
     @Query('current', new DefaultValuePipe(1), ParseIntPipe)
     current: number,
     @Query('pageSize', new DefaultValuePipe(10), ParseIntPipe)
@@ -48,7 +48,7 @@ export class UsersController {
   // ======================
   @Get(':id')
   findOne(@Param('id') id: string) {
-    if (!mongoose.isValidObjectId(id)) {
+    if (!isValidEntityId(id)) {
       throw new BadRequestException('Invalid user id');
     }
 
@@ -60,7 +60,7 @@ export class UsersController {
   // ======================
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    if (!mongoose.isValidObjectId(id)) {
+    if (!isValidEntityId(id)) {
       throw new BadRequestException('Invalid user id');
     }
 
@@ -75,7 +75,7 @@ export class UsersController {
   // ======================
   @Delete(':id')
   remove(@Param('id') id: string) {
-    if (!mongoose.isValidObjectId(id)) {
+    if (!isValidEntityId(id)) {
       throw new BadRequestException('Invalid user id');
     }
 

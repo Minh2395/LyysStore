@@ -1,9 +1,9 @@
-import { IsEnum, IsMongoId, IsNotEmpty } from 'class-validator';
+import { IsEnum, IsNotEmpty, Matches } from 'class-validator';
 import { UserRole } from '../../users/schemas/user.schema';
 
 export class SetRoleDto {
   @IsNotEmpty()
-  @IsMongoId()
+  @Matches(/^[a-f\d]{24}$/i)
   userId: string;
 
   @IsNotEmpty()

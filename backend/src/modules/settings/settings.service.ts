@@ -1,18 +1,26 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-
-import { Model } from 'mongoose';
-
-import { Setting, SettingDocument } from './schemas/setting.schema';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Setting, Upload } from '../../database/entities';
 
 @Injectable()
 export class SettingsService {
   constructor(
-    @InjectModel(Setting.name)
-    private settingModel: Model<SettingDocument>,
+    @InjectRepository(Setting)
+    private settingRepository: Repository<Setting>,
+    @InjectRepository(Upload)
+    private uploadRepository: Repository<Upload>,
   ) {}
 
   async findOne() {
-    return this.settingModel.findOne().populate('logo_upload_id');
+    const setting = await this.settingRepository.findOne({ where: {} });
+    if (!setting?.logo_upload_id) {
+      return setting;
+    }
+
+    const upload = await this.uploadRepository.findOneBy({
+      _id: setting.logo_upload_id,
+    });
+    return { ...setting, logo_upload_id: upload ?? setting.logo_upload_id };
   }
 }

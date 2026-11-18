@@ -2,7 +2,8 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { DATABASE_ENTITIES } from './database/entities';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { AddressesModule } from './modules/addresses/addresses.module';
@@ -47,10 +48,18 @@ import { NewsModule } from './modules/news/news.module';
       serveRoot: '/uploads',
     }),
 
-    MongooseModule.forRootAsync({
+    TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGODB_URI'),
+        type: 'mysql' as const,
+        host: configService.get<string>('MYSQL_HOST', 'localhost'),
+        port: Number(configService.get<string>('MYSQL_PORT', '3306')),
+        username: configService.get<string>('MYSQL_USER', 'lyys_store'),
+        password: configService.get<string>('MYSQL_PASSWORD'),
+        database: configService.get<string>('MYSQL_DATABASE', 'lyys_store'),
+        entities: DATABASE_ENTITIES,
+        synchronize:
+          configService.get<string>('MYSQL_SYNCHRONIZE', 'true') === 'true',
       }),
       inject: [ConfigService],
     }),

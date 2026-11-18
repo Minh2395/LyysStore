@@ -1,20 +1,13 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 import { StoresService } from './stores.service';
 import { StoresController } from './stores.controller';
 
-import { Store, StoreSchema } from './schemas/store.schema';
+import { Store } from '../../database/entities';
 
 @Module({
-  imports: [
-    MongooseModule.forFeature([
-      {
-        name: Store.name,
-        schema: StoreSchema,
-      },
-    ]),
-  ],
+  imports: [TypeOrmModule.forFeature([Store])],
   controllers: [StoresController],
   providers: [StoresService],
   exports: [StoresService], // optional: nếu module khác cần dùng

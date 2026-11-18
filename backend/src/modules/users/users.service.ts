@@ -1,14 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-
-import { InjectModel } from '@nestjs/mongoose';
-import {
-  User,
-  UserDocument,
-  AccountType,
-  UserRole,
-} from './schemas/user.schema';
-import { Model } from 'mongoose';
-import mongoose from 'mongoose';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
+import { User, AccountType, UserRole } from './schemas/user.schema';
+import { isValidEntityId } from '../../database/entity-id';
 import aqp from 'api-query-params';
 import { v4 as uuidv4 } from 'uuid';
 import { MailerService } from '@nestjs-modules/mailer';
@@ -20,12 +14,13 @@ import {
   CodeAuthDto,
   CreateAuthDto,
 } from '../../auth/dto/create-auth.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectModel(User.name)
-    private userModel: Model<UserDocument>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
     private readonly mailerService: MailerService,
   ) {}
 
@@ -33,8 +28,8 @@ export class UsersService {
   // EMAIL CHECK
   // ======================
   async isEmailExist(email: string) {
-    return !!(await this.userModel.exists({
-      email,
+    return !!(await this.userRepository.findOneBy({
+      email: email.toLowerCase().trim(),
       is_deleted: false,
     }));
   }
@@ -51,9 +46,9 @@ export class UsersService {
 
     const hashPassword = await hashPasswordHelper(password);
 
-    const user = await this.userModel.create({
-      name,
-      email,
+    const user = this.userRepository.create({
+      name: name?.trim(),
+      email: email.toLowerCase().trim(),
       password: hashPassword,
       phone,
 
@@ -61,6 +56,7 @@ export class UsersService {
       account_type: AccountType.LOCAL,
       is_active: true,
     });
+    await this.userRepository.save(user);
 
     return {
       _id: user._id,
@@ -74,22 +70,56 @@ export class UsersService {
   // ======================
   // FIND ALL
   // ======================
-  async findAll(query: string, current = 1, pageSize = 10) {
-    const { filter, sort } = aqp(query);
+  async findAll(
+    query: Record<string, string | string[]> | string,
+    current = 1,
+    pageSize = 10,
+  ) {
+    const parsedQuery = aqp(query);
+    const filter = this.toFilterRecord(parsedQuery.filter);
+    const { sort } = parsedQuery;
 
     delete filter.current;
     delete filter.pageSize;
 
     filter.is_deleted = false;
 
-    const totalItems = await this.userModel.countDocuments(filter);
+    const queryBuilder = this.userRepository
+      .createQueryBuilder('user')
+      .where('user.is_deleted = :is_deleted', { is_deleted: false });
+    this.applyFilters(queryBuilder, filter);
 
-    const results = await this.userModel
-      .find(filter)
+    const sortableFields = new Set([
+      '_id',
+      'name',
+      'email',
+      'phone',
+      'account_type',
+      'role',
+      'is_active',
+      'is_deleted',
+      'createdAt',
+      'updatedAt',
+    ]);
+    if (sort && typeof sort === 'object') {
+      for (const [field, direction] of Object.entries(sort)) {
+        if (!sortableFields.has(field)) {
+          continue;
+        }
+        const order = direction === -1 ? 'DESC' : 'ASC';
+        queryBuilder.addOrderBy(`user.${field}`, order);
+      }
+    }
+
+    const [users, totalItems] = await queryBuilder
       .skip((current - 1) * pageSize)
-      .limit(pageSize)
-      .select('-password')
-      .sort(sort as any);
+      .take(pageSize)
+      .getManyAndCount();
+    const results = users.map((user) => {
+      const { password, ...publicUser } = user;
+      void password;
+      return publicUser;
+    });
 
     return {
       meta: {
@@ -106,39 +136,42 @@ export class UsersService {
   // FIND BY EMAIL
   // ======================
   async findByEmail(email: string) {
-    return this.userModel.findOne({ email }).select('+password');
+    return this.userRepository.findOneBy({ email: email.toLowerCase().trim() });
   }
 
   // ======================
   // FIND BY ID
   // ======================
   async findById(id: string) {
-    if (!mongoose.isValidObjectId(id)) {
+    if (!isValidEntityId(id)) {
       throw new BadRequestException('Id không hợp lệ');
     }
 
-    const user = await this.userModel
-      .findOne({ _id: id, is_deleted: false })
-      .select('-password');
+    const user = await this.userRepository.findOneBy({
+      _id: id,
+      is_deleted: false,
+    });
 
     if (!user) {
       throw new BadRequestException('User không tồn tại');
     }
 
-    return user;
+    const { password, ...publicUser } = user;
+    void password;
+    return publicUser;
   }
 
   // ======================
   // UPDATE USER
   // ======================
-  async update(dto: any) {
+  async update(dto: UpdateUserDto & { _id: string }) {
     const { _id, name, email, phone } = dto;
 
-    if (!mongoose.isValidObjectId(_id)) {
+    if (!isValidEntityId(_id)) {
       throw new BadRequestException('Id không hợp lệ');
     }
 
-    const user = await this.userModel.findOne({
+    const user = await this.userRepository.findOneBy({
       _id,
       is_deleted: false,
     });
@@ -147,23 +180,25 @@ export class UsersService {
       throw new BadRequestException('User không tồn tại');
     }
 
-    if (email && email !== user.email) {
-      const existed = await this.userModel.findOne({
-        email,
-        _id: { $ne: _id },
-        is_deleted: false,
-      });
+    const normalizedEmail = email?.toLowerCase().trim();
+    if (normalizedEmail && normalizedEmail !== user.email) {
+      const existed = await this.userRepository
+        .createQueryBuilder('user')
+        .where('user.email = :email', { email: normalizedEmail })
+        .andWhere('user._id <> :id', { id: _id })
+        .andWhere('user.is_deleted = :is_deleted', { is_deleted: false })
+        .getOne();
 
       if (existed) {
         throw new BadRequestException('Email đã tồn tại');
       }
     }
 
-    await this.userModel.updateOne(
+    await this.userRepository.update(
       { _id },
       {
-        ...(name && { name }),
-        ...(email && { email }),
+        ...(name && { name: name.trim() }),
+        ...(normalizedEmail && { email: normalizedEmail }),
         ...(phone && { phone }),
       },
     );
@@ -175,18 +210,16 @@ export class UsersService {
   // HARD DELETE
   // ======================
   async remove(_id: string) {
-    if (!mongoose.isValidObjectId(_id)) {
+    if (!isValidEntityId(_id)) {
       throw new BadRequestException('Id không hợp lệ');
     }
 
-    const result = await this.userModel.deleteOne({
-      _id,
-    });
+    const result = await this.userRepository.delete({ _id });
 
     console.log(typeof _id, _id);
     console.log('DELETE RESULT:', result);
 
-    if (result.deletedCount === 0) {
+    if (result.affected === 0) {
       throw new BadRequestException('User không tồn tại hoặc đã bị xóa');
     }
 
@@ -209,9 +242,9 @@ export class UsersService {
     const hashPassword = await hashPasswordHelper(password);
     const code = uuidv4();
 
-    const user = await this.userModel.create({
-      name,
-      email,
+    const user = this.userRepository.create({
+      name: name?.trim(),
+      email: email.toLowerCase().trim(),
       password: hashPassword,
 
       role: UserRole.USER,
@@ -221,6 +254,7 @@ export class UsersService {
       verification_code: code,
       verification_expires: new Date(Date.now() + 10 * 60 * 1000),
     });
+    await this.userRepository.save(user);
 
     try {
       await this.mailerService.sendMail({
@@ -245,7 +279,7 @@ export class UsersService {
   // ACTIVE ACCOUNT
   // ======================
   async handleActive(data: CodeAuthDto) {
-    const user = await this.userModel.findOne({
+    const user = await this.userRepository.findOneBy({
       _id: data._id,
       verification_code: data.code,
       is_deleted: false,
@@ -257,6 +291,7 @@ export class UsersService {
 
     // check expire
     const isBeforeCheck =
+      !!user.verification_expires &&
       new Date().getTime() < new Date(user.verification_expires).getTime();
 
     if (!isBeforeCheck) {
@@ -264,7 +299,7 @@ export class UsersService {
     }
 
     // activate account
-    await this.userModel.updateOne(
+    await this.userRepository.update(
       { _id: user._id },
       {
         is_active: true,
@@ -282,8 +317,8 @@ export class UsersService {
   // RETRY ACTIVE
   // ======================
   async retryActive(email: string) {
-    const user = await this.userModel.findOne({
-      email,
+    const user = await this.userRepository.findOneBy({
+      email: email.toLowerCase().trim(),
       is_deleted: false,
     });
 
@@ -292,7 +327,7 @@ export class UsersService {
 
     const code = uuidv4();
 
-    await this.userModel.updateOne(
+    await this.userRepository.update(
       { _id: user._id },
       {
         verification_code: code,
@@ -317,15 +352,15 @@ export class UsersService {
   // RETRY PASSWORD
   // ======================
   async retryPassword(email: string) {
-    const user = await this.userModel.findOne({
-      email,
+    const user = await this.userRepository.findOneBy({
+      email: email.toLowerCase().trim(),
     });
 
     if (!user?.email) throw new BadRequestException('Email không tồn tại');
 
     const code = uuidv4();
 
-    await this.userModel.updateOne(
+    await this.userRepository.update(
       { _id: user._id },
       {
         verification_code: code,
@@ -354,8 +389,8 @@ export class UsersService {
       throw new BadRequestException('Mật khẩu không khớp');
     }
 
-    const user = await this.userModel.findOne({
-      email: data.email,
+    const user = await this.userRepository.findOneBy({
+      email: data.email.toLowerCase().trim(),
       verification_code: data.code,
       is_deleted: false,
     });
@@ -370,7 +405,7 @@ export class UsersService {
 
     const newPassword = await hashPasswordHelper(data.password);
 
-    await this.userModel.updateOne(
+    await this.userRepository.update(
       { _id: user._id },
       {
         password: newPassword,
@@ -386,11 +421,11 @@ export class UsersService {
   // UPDATE ROLE
   // ======================
   async updateRole(userId: string, role: UserRole) {
-    if (!mongoose.isValidObjectId(userId)) {
+    if (!isValidEntityId(userId)) {
       throw new BadRequestException('Invalid userId');
     }
 
-    const user = await this.userModel.findOne({
+    const user = await this.userRepository.findOneBy({
       _id: userId,
       is_deleted: false,
     });
@@ -399,8 +434,74 @@ export class UsersService {
       throw new BadRequestException('User not found');
     }
 
-    await this.userModel.updateOne({ _id: userId }, { role });
+    await this.userRepository.update({ _id: userId }, { role });
 
     return { message: 'Update role success' };
+  }
+
+  private applyFilters(
+    queryBuilder: SelectQueryBuilder<User>,
+    filter: Record<string, unknown>,
+  ) {
+    const allowedFields = new Set([
+      '_id',
+      'name',
+      'email',
+      'phone',
+      'account_type',
+      'role',
+      'is_active',
+      'is_deleted',
+    ]);
+    const operators: Record<string, string> = {
+      $eq: '=',
+      $ne: '<>',
+      $gt: '>',
+      $gte: '>=',
+      $lt: '<',
+      $lte: '<=',
+    };
+
+    for (const [field, value] of Object.entries(filter)) {
+      if (!allowedFields.has(field) || field === 'is_deleted') {
+        continue;
+      }
+      if (value && typeof value === 'object' && !Array.isArray(value)) {
+        const filterOperators = value as Record<string, unknown>;
+        for (const [operator, operand] of Object.entries(filterOperators)) {
+          if (operator === '$in' && Array.isArray(operand)) {
+            queryBuilder.andWhere(`user.${field} IN (:...${field}_values)`, {
+              [`${field}_values`]: operand,
+            });
+          } else if (operator === '$nin' && Array.isArray(operand)) {
+            queryBuilder.andWhere(
+              `user.${field} NOT IN (:...${field}_values)`,
+              { [`${field}_values`]: operand },
+            );
+          } else if (operator === '$regex' && typeof operand === 'string') {
+            queryBuilder.andWhere(`user.${field} LIKE :${field}_regex`, {
+              [`${field}_regex`]: `%${operand.replace(/\.\*/g, '%')}%`,
+            });
+          } else if (operators[operator]) {
+            queryBuilder.andWhere(
+              `user.${field} ${operators[operator]} :${field}_value`,
+              { [`${field}_value`]: operand },
+            );
+          }
+        }
+      } else {
+        queryBuilder.andWhere(`user.${field} = :${field}_value`, {
+          [`${field}_value`]: value,
+        });
+      }
+    }
+  }
+
+  private toFilterRecord(value: unknown): Record<string, unknown> {
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+      return {};
+    }
+
+    return value as Record<string, unknown>;
   }
 }
